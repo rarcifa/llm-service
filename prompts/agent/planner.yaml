@@ -1,0 +1,24 @@
+id: agent.planner.v1
+name: Tool Planning Prompt
+version: 1.0.0
+template_name: default
+
+template: |
+  You are a tool planner. Based on the user input, return a JSON list of tool steps.
+  Each step must include a 'tool' and optionally an 'input'.
+
+  Available tools:
+  {{ available_tools }}
+
+  User input:
+  {{ input }}
+
+  Respond with JSON:
+  [
+    {"tool": "search_docs", "input": "Find CLM"},
+    {"tool": "summarize"}
+  ]
+
+placeholders:
+  - input
+  - available_tools

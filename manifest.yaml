@@ -1,0 +1,73 @@
+name: document_qa_assistant
+version: 1.0.0
+description: |
+  Answers domain-specific questions by retrieving context from indexed documents.
+
+models:
+  main:
+    provider: ollama
+    model_id: llama3
+    temperature: 0.3
+    max_tokens: 1024
+
+  eval:
+    provider: ollama
+    model_id: phi3-mini
+    temperature: 0.0
+    max_tokens: 512
+
+  embedding:
+    model_id: all-MiniLM-L6-v2
+    provider: sentence-transformers
+
+retrieval:
+  enabled: true
+  vector_store: chromadb
+  chunk_size: 512
+  embedding_model: all-MiniLM-L6-v2
+
+tools:
+  - name: search_docs
+    description: Retrieve documents from vector DB based on user query
+    permissions: read_only
+  - name: pii_redactor
+    description: Redacts PII from user inputs before LLM invocation
+    permissions: transformation
+
+memory:
+  type: vector
+  persistence: chromadb
+  window_size: 3
+  expiry_minutes: 90
+
+guardrails:
+  prompt_injection_detection: rebuff
+  pii_filter: presidio
+  output_filters:
+    - profanity_check
+    - hallucination_blocker
+
+eval:
+  enabled: true
+  framework: phoenix
+  use_llm_judge: true
+  use_grounding_score: true
+  thresholds:
+    grounding_pass: 0.7
+    grounding_fail: 0.4
+    helpfulness_pass: 4
+    helpfulness_fail: 2
+  evals:
+    - name: helpfulness
+      type: llm-judge
+    - name: safety
+      type: regex_filter
+    - name: grounding
+      type: semantic_similarity
+
+logging:
+  level: info
+  format: json
+  sinks:
+    - file: logs/agent_run.log
+    - stdout: true

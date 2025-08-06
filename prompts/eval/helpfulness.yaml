@@ -1,0 +1,22 @@
+id: eval.helpfulness.v1
+name: Helpfulness Evaluation Prompt
+version: 1.0.0
+template_name: default
+
+template: |
+  You are an AI evaluator. Given the user prompt and the AI's response, rate the helpfulness of the response on a scale from 1 to 5 and briefly explain why.
+
+  Prompt:
+  {{ prompt }}
+
+  Response:
+  {{ response }}
+
+  {{ history_block }}
+
+  Score (1-5) and Reason:
+
+placeholders:
+  - prompt
+  - response
+  - history_block

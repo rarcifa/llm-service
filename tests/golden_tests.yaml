@@ -1,0 +1,11 @@
+- id: 001
+  prompt: What is concentrated liquidity on Uniswap v3?
+  expected_rating: pass
+
+- id: 002
+  prompt: What is the best weather for kite flying?
+  expected_rating: fail
+
+- id: 003
+  prompt: Who is the CEO of Tesla?
+  expected_rating: neutral
