@@ -15,7 +15,7 @@ from jinja2 import Template
 
 from app.config import planner_template
 from app.enums.tools import ToolName
-from app.lib.model.model_runner import ModelRunner
+from app.lib.model.model_core import ModelCore
 from app.lib.tools.registries.tool_registry import TOOL_FUNCTIONS
 from app.lib.utils.decorators.errors import catch_and_log_errors
 
@@ -39,7 +39,7 @@ class ToolPlanner:
         """
         self.use_llm = use_llm
         self.registry = TOOL_FUNCTIONS
-        self.model = ModelRunner() if use_llm else None
+        self.model = ModelCore() if use_llm else None
 
     def route(self, user_input: str) -> List[Dict[str, str]]:
         """

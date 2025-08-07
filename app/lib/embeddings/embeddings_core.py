@@ -19,7 +19,7 @@ from app.lib.embeddings.embeddings_utils import get_cached_embedding
 from app.lib.utils.decorators.errors import catch_and_log_errors
 
 
-class MemoryManager:
+class EmbeddingsCore:
     """
     Handles semantic memory storage and retrieval using ChromaDB.
 

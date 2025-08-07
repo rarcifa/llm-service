@@ -26,10 +26,12 @@ class ToolName(StrEnum):
     """
 
     SEARCH_DOCS = "search_docs"
-    PII_REDACTOR = "pii_redactor"
+    PII_REDACTOR = "presidio"
     PROFANITY_FILTER = "profanity_filter"
+    PROMPT_INJECTION_DETECTOR = "prompt_injection_detection"
     SUMMARIZE = "summarize"
     CALCULATOR = "calculator"
+    HALLUCINATION_BLOCKER = "hallucination_blocker"
 
 
 class ToolKey(StrEnum):

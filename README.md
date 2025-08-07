@@ -16,31 +16,39 @@ This system follows a **modular, layered architecture** inspired by:
 
 ```mermaid
 graph TD
-    subgraph FastAPI Layer
-        A[API Layer]
+    subgraph Client
+        Z[Frontend / CLI / External App]
     end
 
-    subgraph Agent
-        B[AgentRunner]
-        B -->|"response"| C[Client]
-        B --> D[EvaluationRunner_async]
+    subgraph API_Layer
+        A[FastAPI Controller]
     end
 
-    subgraph LLM Layer
-        F[Memory / Tools / Context Builder]
-        E[LLM Call]
+    subgraph Guardrails
+        GA[Input Filters - PII, Injection, Profanity]
+    end
+
+    subgraph Agent_Layer
+        B[AgentRunner / Streamer]
+        B --> D[Async Eval Thread]
+    end
+
+    subgraph LLM_Pipeline
+        E[Prompt + Tools + Memory]
+        F[LLM Call via Ollama]
     end
 
     subgraph Persistence
-        G[DB: Sessions + Messages]
-        H[Phoenix / OTLP]
+        G[PostgreSQL - Sessions]
+        H[Phoenix Tracing - OTLP]
     end
 
-    A --> B
-    B --> F
-    F --> E
+    Z -->|POST /chat| A --> GA --> B
+    B --> E --> F
     B --> G
     D --> H
+    B -->|Response| Z
+
 ```
 
 ---
@@ -144,6 +152,33 @@ sequenceDiagram
 - Includes scores: `grounding`, `confidence`, `hallucination`, etc
 
 ---
+
+## Guardrails
+
+The agent applies input and output filters based on the manifest:
+
+```yaml
+guardrails:
+  prompt_injection_detection: rebuff
+  pii_filter: presidio
+  output_filters:
+    - profanity_check
+    - hallucination_blocker
+```
+
+These are mapped to callable tools via guardrail_registry.py.
+
+- **Input**: Prompt injection + PII + profanity filters
+- **Output**: Hallucination blocking, custom regex filters
+
+## Safety Tooling
+
+| Name                    | Purpose                                 |
+| ----------------------- | --------------------------------------- |
+| `rebuff`                | Prompt injection detection              |
+| `presidio`              | PII redaction                           |
+| `profanity_check`       | Replaces/flags offensive content        |
+| `hallucination_blocker` | (Custom) filters misleading completions |
 
 ## Design Philosophy
 

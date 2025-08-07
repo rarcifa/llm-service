@@ -15,7 +15,7 @@ from app.lib.utils.decorators.errors import catch_and_log_errors
 from app.lib.utils.decorators.retry import with_retry
 
 
-class ModelRunner:
+class ModelCore:
     """
     Service class for executing model queries with retry and error handling.
 

@@ -1,4 +1,5 @@
 from app.lib.agent.agent_runner import AgentRunner
+from app.lib.agent.agent_streamer import AgentStreamer
 
 
 class ChatService:
@@ -12,7 +13,8 @@ class ChatService:
     """
 
     def __init__(self):
-        self.agent = AgentRunner()
+        self.runner = AgentRunner()
+        self.streamer = AgentStreamer()
 
     def chat(self, user_input: str, session_id: str = None) -> str:
         """
@@ -25,7 +27,7 @@ class ChatService:
         Returns:
             str: The model's response.
         """
-        return self.agent.run(user_input, session_id)
+        return self.runner.run(user_input, session_id)
 
     def stream_chat(self, user_input: str, session_id: str = None):
         """
@@ -38,7 +40,7 @@ class ChatService:
         Returns:
             Generator[str]: Streamed output from the model.
         """
-        return self.agent.stream(user_input, session_id)
+        return self.streamer.stream(user_input, session_id)
 
 
 # Singleton instance

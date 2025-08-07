@@ -13,15 +13,14 @@ Author: Ricardo Arcifa
 Created: 2025-02-03
 """
 
-from pathlib import Path
-
 import yaml
 
 from app.constants.values import MANIFEST_PATH, PROMPT_DIR
 from app.enums.eval import EvalConfigKey, RetrievalConfigKey
 from app.enums.manifest import ManifestConfigKey
 from app.enums.prompts import PromptConfigKey
-from app.lib.embeddings.memory_manager import MemoryManager
+from app.enums.tools import ToolName
+from app.lib.embeddings.embeddings_core import EmbeddingsCore
 from app.lib.tools.registries.prompt_registry import PromptRegistry
 
 # === Load and parse manifest.yaml ===
@@ -74,5 +73,13 @@ thresholds = manifest_cfg.get(ManifestConfigKey.EVAL, {}).get(
     ManifestConfigKey.THRESHOLDS, {}
 )
 
+# === Guardrails ===
+guardrail_cfg = manifest_cfg.get("guardrails", {})
+input_filters = {
+    ToolName.PII_REDACTOR: guardrail_cfg.get("pii_filter", "presidio"),
+    ToolName.PROMPT_INJECTION_DETECTOR: guardrail_cfg.get("prompt_injection_detection", "rebuff"),
+}
+output_filters = guardrail_cfg.get("output_filters", [])
+
 # === Singleton memory manager ===
-memory = MemoryManager(manifest_cfg[ManifestConfigKey.MEMORY])
+memory = EmbeddingsCore(manifest_cfg[ManifestConfigKey.MEMORY])

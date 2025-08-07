@@ -34,16 +34,12 @@ from app.enums.eval import (
 )
 from app.enums.prompts import ModelType, ScoreKey
 from app.lib.embeddings.embeddings_utils import get_embedding_model
-from app.lib.tools.registries.prompt_registry import PromptRegistry
 from app.lib.utils.decorators.errors import catch_and_log_errors
 from app.lib.utils.logger import setup_logger
 
 logger = setup_logger()
 tracer = trace.get_tracer(__name__)
 embedding_model = get_embedding_model()
-prompt_registry = PromptRegistry("prompts")
-helpfulness_template = prompt_registry.get("eval/helpfulness")["template"]
-
 
 @catch_and_log_errors(default_return={"error": EvalErrorType.SCORE_GROUNDEDNESS})
 def score_groundedness_with_embeddings(

@@ -44,7 +44,7 @@ guardrails:
   prompt_injection_detection: rebuff
   pii_filter: presidio
   output_filters:
-    - profanity_check
+    - profanity_filter
     - hallucination_blocker
 
 eval:

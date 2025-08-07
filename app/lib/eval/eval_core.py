@@ -21,7 +21,7 @@ from app.lib.utils.logger import setup_logger
 logger = setup_logger()
 
 
-class EvaluationRunner:
+class EvaluationCore:
     """
     Service responsible for evaluating agent responses.
 
