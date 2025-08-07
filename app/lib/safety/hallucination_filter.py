@@ -25,7 +25,7 @@ def filter_hallucinations(response: str) -> str:
     """
     # You may want to actually *modify* the response here if HIGH
     risk = detect_hallucination(response, [])
-    
+
     if risk == "HIGH":
         return "[Warning: Potential hallucination detected]\n\n" + response
     return response

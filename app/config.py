@@ -56,12 +56,20 @@ grounding_template = grounding[PromptConfigKey.TEMPLATE]
 relevance_template = relevance[PromptConfigKey.TEMPLATE]
 
 # === Manifest-based runtime config ===
+
 main_model = manifest_cfg["models"]["main"]["model_id"]
 eval_model = manifest_cfg["models"]["eval"]["model_id"]
+rag_model = manifest_cfg["models"]["rag"]["model_id"]
 embedding_model = manifest_cfg["models"]["embedding"]["model_id"]
 
 main_temperature = manifest_cfg["models"]["main"].get("temperature", 0.3)
 main_max_tokens = manifest_cfg["models"]["main"].get("max_tokens", 1024)
+
+chroma_path = manifest_cfg.get("retrieval", {}).get("chroma_path", "data/chroma_db")
+context_window = (
+    manifest_cfg.get("models", {}).get("main", {}).get("context_window", 1024)
+)
+top_p = manifest_cfg.get("models", {}).get("main", {}).get("top_p", 0.95)
 
 use_eval = manifest_cfg.get(ManifestConfigKey.EVAL, {}).get(
     EvalConfigKey.ENABLED, False
@@ -77,7 +85,9 @@ thresholds = manifest_cfg.get(ManifestConfigKey.EVAL, {}).get(
 guardrail_cfg = manifest_cfg.get("guardrails", {})
 input_filters = {
     ToolName.PII_REDACTOR: guardrail_cfg.get("pii_filter", "presidio"),
-    ToolName.PROMPT_INJECTION_DETECTOR: guardrail_cfg.get("prompt_injection_detection", "rebuff"),
+    ToolName.PROMPT_INJECTION_DETECTOR: guardrail_cfg.get(
+        "prompt_injection_detection", "rebuff"
+    ),
 }
 output_filters = guardrail_cfg.get("output_filters", [])
 

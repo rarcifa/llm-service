@@ -17,14 +17,17 @@ models:
     max_tokens: 512
 
   embedding:
-    model_id: all-MiniLM-L6-v2
     provider: sentence-transformers
+    model_id: all-MiniLM-L6-v2
+
+  rag:
+    provider: sentence-transformers
+    model_id: all-MiniLM-L6-v2
 
 retrieval:
   enabled: true
   vector_store: chromadb
   chunk_size: 512
-  embedding_model: all-MiniLM-L6-v2
 
 tools:
   - name: search_docs
@@ -33,6 +36,9 @@ tools:
   - name: pii_redactor
     description: Redacts PII from user inputs before LLM invocation
     permissions: transformation
+  - name: ask_docs
+    description: Ask embedded docs using LlamaIndex
+    permissions: read_only
 
 memory:
   type: vector

@@ -12,10 +12,10 @@ from typing import Tuple
 
 from app.config import memory, retrieval_enabled
 from app.enums.tools import ToolKey, ToolName
-from app.lib.tools.tool_planner import ToolPlanner
-from app.lib.tools.step_executor import StepExecutor
+from app.lib.agent.agent_utils import render_prompt, sanitize_input
 from app.lib.tools.registries.tool_registry import TOOL_FUNCTIONS
-from app.lib.agent.agent_utils import sanitize_input, render_prompt
+from app.lib.tools.step_executor import StepExecutor
+from app.lib.tools.tool_planner import ToolPlanner
 
 
 class AgentCore:
@@ -42,7 +42,7 @@ class AgentCore:
             user_input (str): Raw input from the user
 
         Returns:
-            Tuple[str, str, list[str], list[dict]]: 
+            Tuple[str, str, list[str], list[dict]]:
                 - filtered_input (str)
                 - rendered_prompt (str)
                 - context_chunks (list)
@@ -58,7 +58,9 @@ class AgentCore:
             context_chunks.insert(0, f"Tool result: {tool_output}")
 
         if retrieval_enabled:
-            retrieved = TOOL_FUNCTIONS[ToolName.SEARCH_DOCS][ToolKey.FUNCTION](filtered_input)
+            retrieved = TOOL_FUNCTIONS[ToolName.SEARCH_DOCS][ToolKey.FUNCTION](
+                filtered_input
+            )
             context_chunks += retrieved
 
         rendered_prompt = render_prompt(filtered_input, context_chunks)

@@ -19,7 +19,7 @@ from typing import Optional
 
 from jinja2 import Template
 
-from app.config import memory, qa_name, qa_template, retrieval_enabled, input_filters
+from app.config import input_filters, memory, qa_name, qa_template, retrieval_enabled
 from app.db.repositories.session_repository import get_session_repo
 from app.enums.errors.agent import AgentErrorType
 from app.enums.prompts import PromptConfigKey, RoleKey
@@ -49,7 +49,9 @@ def sanitize_input(user_input: str) -> str:
         raise ValueError("Prompt injection detected.")
 
     # Lookup PII filter from manifest
-    pii_tool = GUARDRAIL_FUNCTIONS[input_filters[ToolName.PII_REDACTOR]][ToolKey.FUNCTION]
+    pii_tool = GUARDRAIL_FUNCTIONS[input_filters[ToolName.PII_REDACTOR]][
+        ToolKey.FUNCTION
+    ]
 
     # Always use fixed profanity filter — since it's post-PII cleaning
     profanity_tool = GUARDRAIL_FUNCTIONS[ToolName.PROFANITY_FILTER][ToolKey.FUNCTION]

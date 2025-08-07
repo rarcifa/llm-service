@@ -41,6 +41,7 @@ logger = setup_logger()
 tracer = trace.get_tracer(__name__)
 embedding_model = get_embedding_model()
 
+
 @catch_and_log_errors(default_return={"error": EvalErrorType.SCORE_GROUNDEDNESS})
 def score_groundedness_with_embeddings(
     response: str, retrieved_docs: list[str]

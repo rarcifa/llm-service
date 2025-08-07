@@ -12,24 +12,20 @@ import threading
 import uuid
 from typing import Any
 
-from app.config import (
-    main_model,
-    use_eval,
-    output_filters
-)
+from app.config import main_model, output_filters, use_eval
+from app.db.repositories.session_repository import get_session_repo
 from app.enums.errors.agent import AgentErrorType
-from app.enums.prompts import JsonKey
 from app.enums.eval import EvalResultKey, RetrievalDocKey
+from app.enums.prompts import JsonKey
 from app.enums.tools import ToolKey
-from app.lib.agent.agent_utils import persist_conversation
 from app.lib.agent.agent_core import AgentCore
+from app.lib.agent.agent_utils import persist_conversation
 from app.lib.eval.eval_core import EvaluationCore
 from app.lib.model.model_core import ModelCore
-from app.db.repositories.session_repository import get_session_repo
 from app.lib.tools.registries.guardrail_registry import GUARDRAIL_FUNCTIONS
 from app.lib.utils.decorators.errors import catch_and_log_errors
-from app.lib.utils.logger import setup_logger
 from app.lib.utils.decorators.tracing import get_tracer, setup_tracing
+from app.lib.utils.logger import setup_logger
 
 # Setup instrumentation
 logger = setup_logger()
@@ -63,15 +59,17 @@ class AgentRunner:
         message_id = str(uuid.uuid4())
         session_id = session_id or str(uuid.uuid4())
 
-        filtered_input, rendered_prompt, context_chunks, plan = self.pipeline.build(user_input)
+        filtered_input, rendered_prompt, context_chunks, plan = self.pipeline.build(
+            user_input
+        )
 
         response = self.model.run(rendered_prompt)
-        
+
         # Apply guardrail filters before persisting or returning
         for filter_name in output_filters:
             filter_func = GUARDRAIL_FUNCTIONS[filter_name][ToolKey.FUNCTION]
             response = filter_func(response)
-            
+
         persist_conversation(
             session_id=session_id,
             user_input=user_input,
@@ -100,13 +98,7 @@ class AgentRunner:
                 daemon=True,
             ).start()
 
-        return {
-            JsonKey.SESSION_ID: session_id,
-            JsonKey.RESPONSE_ID: response_id,
-            JsonKey.MESSAGE_ID: message_id,
-            JsonKey.RESPONSE: response.strip(),
-            "prompt": rendered_prompt,
-        }
+        return response
 
     def _background_eval(self, **kwargs):
         with get_session_repo() as repo:

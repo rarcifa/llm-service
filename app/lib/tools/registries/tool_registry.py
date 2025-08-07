@@ -14,6 +14,7 @@ Created: 2025-02-03
 
 from typing import Callable, Dict
 
+from app.lib.tools.tool_rag import ask_docs
 from app.lib.tools.vector_search import retrieve_relevant_docs
 
 TOOL_FUNCTIONS: Dict[str, Dict[str, Callable | str]] = {
@@ -28,5 +29,9 @@ TOOL_FUNCTIONS: Dict[str, Dict[str, Callable | str]] = {
     "calculator": {
         "function": lambda input: f"[calculator called with: {input}]",
         "description": "Performs basic arithmetic or evaluation of math expressions.",
+    },
+    "ask_docs": {
+        "function": ask_docs,
+        "description": "Ask the embedded document index via LlamaIndex RAG pipeline.",
     },
 }

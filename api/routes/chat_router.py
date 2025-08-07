@@ -27,7 +27,7 @@ def get_chat_controller():
     return ChatController(ChatService())
 
 
-@router.post("/", summary="Chat with the LLM agent")
+@router.post("", summary="Chat with the LLM agent")
 async def chat_route(
     request: Request, controller: ChatController = Depends(get_chat_controller)
 ):

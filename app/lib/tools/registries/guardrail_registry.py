@@ -24,7 +24,7 @@ GUARDRAIL_FUNCTIONS: Dict[str, Dict[str, Callable | str]] = {
         "function": detect_prompt_injection,
         "description": "Detects prompt injection attempts using heuristics or patterns.",
     },
-   ToolName.PII_REDACTOR: {
+    ToolName.PII_REDACTOR: {
         "function": redact_pii,
         "description": "Redacts personally identifiable information (PII) from user input.",
     },

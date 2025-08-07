@@ -12,24 +12,20 @@ import threading
 import uuid
 from typing import Generator
 
-from app.config import (
-    main_model,
-    use_eval,
-    output_filters,
-)
-from app.enums.prompts import JsonKey
-from app.enums.eval import EvalResultKey, RetrievalDocKey
+from app.config import main_model, output_filters, use_eval
+from app.db.repositories.session_repository import get_session_repo
 from app.enums.errors.agent import AgentErrorType
+from app.enums.eval import EvalResultKey, RetrievalDocKey
+from app.enums.prompts import JsonKey
 from app.enums.tools import ToolKey
 from app.lib.agent.agent_core import AgentCore
 from app.lib.agent.agent_utils import persist_conversation, stream_with_capture
 from app.lib.eval.eval_core import EvaluationCore
 from app.lib.model.model_core import ModelCore
-from app.db.repositories.session_repository import get_session_repo
 from app.lib.tools.registries.guardrail_registry import GUARDRAIL_FUNCTIONS
-from app.lib.utils.logger import setup_logger
 from app.lib.utils.decorators.errors import catch_and_log_errors
 from app.lib.utils.decorators.tracing import get_tracer, setup_tracing
+from app.lib.utils.logger import setup_logger
 
 # Setup instrumentation
 logger = setup_logger()
@@ -50,15 +46,17 @@ class AgentStreamer:
         self.model = ModelCore()
         self.pipeline = AgentCore()
 
-    @catch_and_log_errors(
-        default_return={"error": AgentErrorType.AGENT_STREAM_CAPTURE}
-    )
-    def stream(self, user_input: str, session_id: str = None) -> Generator[str, None, None]:
+    @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_STREAM_CAPTURE})
+    def stream(
+        self, user_input: str, session_id: str = None
+    ) -> Generator[str, None, None]:
         response_id = str(uuid.uuid4())
         message_id = str(uuid.uuid4())
         session_id = session_id or str(uuid.uuid4())
 
-        filtered_input, rendered_prompt, context_chunks, plan = self.pipeline.build(user_input)
+        filtered_input, rendered_prompt, context_chunks, plan = self.pipeline.build(
+            user_input
+        )
 
         response = self.model.stream(rendered_prompt)
 
@@ -67,7 +65,7 @@ class AgentStreamer:
             for filter_name in output_filters:
                 filter_func = GUARDRAIL_FUNCTIONS[filter_name][ToolKey.FUNCTION]
                 final_response = filter_func(final_response)
-                            
+
             persist_conversation(
                 session_id=session_id,
                 user_input=user_input,
