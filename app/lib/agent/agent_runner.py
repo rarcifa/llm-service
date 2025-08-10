@@ -106,7 +106,8 @@ class AgentRunner:
         )
 
         if result:
-            top_doc = result.get("retrieval", {}).get("docs", [{}])[0]
+            docs = result.get("retrieval", {}).get("docs") or []
+            top_doc = docs[0] if docs else {}
             logger.info(
                 "Evaluation completed",
                 rating=result.get(EvalResultKey.RATING),
