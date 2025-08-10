@@ -41,41 +41,6 @@ class ChatController:
 
     async def chat(self, request: Request):
         """
-        Handles a non-streaming chat request.
-
-        Args:
-            request (Request): The FastAPI request containing the user input.
-
-        Returns:
-            JSONResponse: The agent's full response or an error message.
-        """
-        try:
-            body = ChatRequest(**await request.json())
-            user_input = getattr(body, RequestKey.INPUT)
-            session_id = getattr(body, RequestKey.SESSION_ID)
-
-            if not user_input:
-                return JSONResponse(
-                    {ResponseKey.ERROR: f"Missing '{RequestKey.INPUT}' field"},
-                    status_code=HTTPStatusCode.BAD_REQUEST,
-                )
-
-            result = self.service.chat(user_input, session_id)
-            return JSONResponse(content=result, status_code=HTTPStatusCode.OK)
-
-        except ValueError as ve:
-            return JSONResponse(
-                {ResponseKey.ERROR: str(ve)}, status_code=HTTPStatusCode.BAD_REQUEST
-            )
-
-        except Exception as e:
-            return JSONResponse(
-                {ResponseKey.ERROR: "Internal server error"},
-                status_code=HTTPStatusCode.INTERNAL_SERVER_ERROR,
-            )
-
-    async def stream_chat(self, request: Request):
-        """
         Handles a streaming chat request and returns token-by-token output.
 
         Args:
@@ -95,7 +60,7 @@ class ChatController:
                     status_code=HTTPStatusCode.BAD_REQUEST,
                 )
 
-            stream = self.service.stream_chat(user_input, session_id)
+            stream = self.service.chat(user_input, session_id)
             return StreamingResponse(
                 stream, media_type="text/plain", status_code=HTTPStatusCode.OK
             )

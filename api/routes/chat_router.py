@@ -27,28 +27,8 @@ def get_chat_controller():
     return ChatController(ChatService())
 
 
-@router.post("", summary="Chat with the LLM agent")
+@router.post("", summary="Stream Chat with the LLM agent")
 async def chat_route(
-    request: Request, controller: ChatController = Depends(get_chat_controller)
-):
-    """
-    POST /chat
-
-    Handles a standard (non-streaming) chat request with the agent.
-    Accepts a JSON payload containing `input` and optional `session_id`.
-
-    Args:
-        request (Request): The FastAPI request with user input.
-        controller (ChatController): Dependency-injected controller.
-
-    Returns:
-        JSONResponse: The agent's response or an error.
-    """
-    return await controller.chat(request)
-
-
-@router.post("/stream", summary="Stream Chat with the LLM agent")
-async def stream_chat_route(
     request: Request, controller: ChatController = Depends(get_chat_controller)
 ):
     """
@@ -64,4 +44,4 @@ async def stream_chat_route(
     Returns:
         StreamingResponse: A stream of agent response tokens as plain text.
     """
-    return await controller.stream_chat(request)
+    return await controller.chat(request)

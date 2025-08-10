@@ -1,8 +1,8 @@
 """
-agent_runner.py
+agent_streamer.py
 
-Runs the LLM agent in blocking (non-streaming) mode. Responsible for building
-context-aware prompts, invoking the model, persisting interactions, and triggering eval.
+Runs the LLM agent in streaming mode. Streams the response token-by-token,
+persisting results and optionally performing background evaluation.
 
 Author: Ricardo Arcifa
 Created: 2025-02-03
@@ -10,7 +10,7 @@ Created: 2025-02-03
 
 import threading
 import uuid
-from typing import Any
+from typing import Generator
 
 from app.config import main_model, output_filters, use_eval
 from app.db.repositories.session_repository import get_session_repo
@@ -19,7 +19,7 @@ from app.enums.eval import EvalResultKey, RetrievalDocKey
 from app.enums.prompts import JsonKey
 from app.enums.tools import ToolKey
 from app.lib.agent.agent_core import AgentCore
-from app.lib.agent.agent_utils import persist_conversation
+from app.lib.agent.agent_utils import persist_conversation, stream_with_capture
 from app.lib.eval.eval_core import EvaluationCore
 from app.lib.model.model_core import ModelCore
 from app.lib.tools.registries.guardrail_registry import GUARDRAIL_FUNCTIONS
@@ -35,10 +35,10 @@ tracer = get_tracer(__name__)
 
 class AgentRunner:
     """
-    Orchestrates blocking (non-streaming) agent execution.
+    Orchestrates streaming agent execution.
 
     Methods:
-        run(user_input, session_id): Full run, returns model response and metadata.
+        stream(user_input, session_id): Streams output token-by-token.
     """
 
     def __init__(self):
@@ -46,15 +46,10 @@ class AgentRunner:
         self.model = ModelCore()
         self.pipeline = AgentCore()
 
-    @catch_and_log_errors(
-        default_return={
-            "error": AgentErrorType.AGENT_RUN,
-            JsonKey.RESPONSE_ID: None,
-            JsonKey.MESSAGE_ID: None,
-            JsonKey.SESSION_ID: None,
-        }
-    )
-    def run(self, user_input: str, session_id: str = None) -> dict[str, Any]:
+    @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_STREAM_CAPTURE})
+    def run(
+        self, user_input: str, session_id: str = None
+    ) -> Generator[str, None, None]:
         response_id = str(uuid.uuid4())
         message_id = str(uuid.uuid4())
         session_id = session_id or str(uuid.uuid4())
@@ -63,42 +58,43 @@ class AgentRunner:
             user_input
         )
 
-        response = self.model.run(rendered_prompt)
+        response = self.model.stream(rendered_prompt)
 
-        # Apply guardrail filters before persisting or returning
-        for filter_name in output_filters:
-            filter_func = GUARDRAIL_FUNCTIONS[filter_name][ToolKey.FUNCTION]
-            response = filter_func(response)
+        def _on_stream_complete(final_response: str):
+            # Apply guardrail filters before persisting or returning
+            for filter_name in output_filters:
+                filter_func = GUARDRAIL_FUNCTIONS[filter_name][ToolKey.FUNCTION]
+                final_response = filter_func(final_response)
 
-        persist_conversation(
-            session_id=session_id,
-            user_input=user_input,
-            response=response,
-            tokens_used=len(response.split()),
-            metadata={
-                "model_used": main_model,
-                "tools_enabled": [step["tool"] for step in plan] if plan else [],
-                "eval_enabled": use_eval,
-            },
-        )
-
-        if use_eval:
-            threading.Thread(
-                target=self._background_eval,
-                kwargs={
-                    "filtered_input": filtered_input,
-                    JsonKey.RESPONSE: response,
-                    "retrieved_docs": context_chunks,
-                    JsonKey.RESPONSE_ID: response_id,
-                    JsonKey.MESSAGE_ID: message_id,
-                    JsonKey.SESSION_ID: session_id,
-                    "rendered_prompt": rendered_prompt,
-                    "raw_input": user_input,
+            persist_conversation(
+                session_id=session_id,
+                user_input=user_input,
+                response=final_response,
+                tokens_used=len(final_response.split()),
+                metadata={
+                    "model_used": main_model,
+                    "tools_enabled": [step["tool"] for step in plan] if plan else [],
+                    "eval_enabled": use_eval,
                 },
-                daemon=True,
-            ).start()
+            )
 
-        return response
+            if use_eval:
+                threading.Thread(
+                    target=self._background_eval,
+                    kwargs={
+                        "filtered_input": filtered_input,
+                        JsonKey.RESPONSE: final_response,
+                        "retrieved_docs": context_chunks,
+                        JsonKey.RESPONSE_ID: response_id,
+                        JsonKey.MESSAGE_ID: message_id,
+                        JsonKey.SESSION_ID: session_id,
+                        "rendered_prompt": rendered_prompt,
+                        "raw_input": user_input,
+                    },
+                    daemon=True,
+                ).start()
+
+        return stream_with_capture(response, on_complete=_on_stream_complete)
 
     def _background_eval(self, **kwargs):
         with get_session_repo() as repo:
