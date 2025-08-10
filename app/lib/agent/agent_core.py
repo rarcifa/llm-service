@@ -17,6 +17,8 @@ from app.lib.tools.registries.tool_registry import TOOL_FUNCTIONS
 from app.lib.tools.step_executor import StepExecutor
 from app.lib.tools.tool_planner import ToolPlanner
 
+import logging
+logger = logging.getLogger("agent")
 
 class AgentCore:
     """
@@ -27,7 +29,7 @@ class AgentCore:
     """
 
     def __init__(self):
-        self.planner = ToolPlanner(use_llm=False)
+        self.planner = ToolPlanner(use_llm=True)
         self.step_executor = StepExecutor(TOOL_FUNCTIONS)
 
     def build(self, user_input: str) -> Tuple[str, str, list[str], list[dict]]:
@@ -51,18 +53,10 @@ class AgentCore:
         filtered_input = sanitize_input(user_input)
         plan = self.planner.route(filtered_input)
         tool_output = self.step_executor.execute(plan) if plan else None
-
         context_chunks = memory.retrieve_context(filtered_input)
 
-        if tool_output and isinstance(tool_output, str):
-            context_chunks.insert(0, f"Tool result: {tool_output}")
-
-        if retrieval_enabled:
-            retrieved = TOOL_FUNCTIONS[ToolName.SEARCH_DOCS][ToolKey.FUNCTION](
-                filtered_input
-            )
-            context_chunks += retrieved
+        if tool_output and isinstance(tool_output, str) and tool_output.strip():
+            context_chunks.insert(0, tool_output.strip())
 
         rendered_prompt = render_prompt(filtered_input, context_chunks)
-
         return filtered_input, rendered_prompt, context_chunks, plan
