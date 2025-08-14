@@ -17,3 +17,7 @@ class SessionModel(Base):
     messages = relationship(
         "MessageModel", back_populates="session", cascade="all, delete-orphan"
     )
+
+    vector_records = relationship(
+        "VectorRecordModel", back_populates="session", cascade="all, delete-orphan"
+    )

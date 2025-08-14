@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import Any, Callable, Dict, List
 
 from app.common.decorators.errors import catch_and_log_errors
@@ -29,7 +30,9 @@ class StepExecutorImpl(StepExecutorBase):
                 raise ValueError(f"Step {i} is missing a 'tool' key.")
 
             if tool not in self.registry:
-                raise ValueError(f"Tool '{tool}' is not registered in the tool registry.")
+                raise ValueError(
+                    f"Tool '{tool}' is not registered in the tool registry."
+                )
 
             tool_fn = self.registry[tool]["function"]
             # Execute

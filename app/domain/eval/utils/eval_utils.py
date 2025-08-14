@@ -14,9 +14,10 @@ from jinja2 import Template
 from opentelemetry.trace import get_current_span
 from sentence_transformers import util
 
+from app.common.decorators.errors import catch_and_log_errors
 from app.config import CFG
 from app.constants.values import OLLAMA_CLI, OLLAMA_CMD
-from app.domain.embeddings.utils.embeddings_utils import get_embedding_model
+from app.domain.retrieval.utils.embeddings_utils import get_embedding_model
 from app.enums.errors.eval import EvalErrorType
 from app.enums.eval import (
     GroundingKey,
@@ -26,7 +27,6 @@ from app.enums.eval import (
     RetrievalSource,
 )
 from app.enums.prompts import ModelType, ScoreKey
-from app.common.decorators.errors import catch_and_log_errors
 
 
 @catch_and_log_errors(default_return={"error": EvalErrorType.SCORE_GROUNDEDNESS})

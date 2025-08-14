@@ -14,21 +14,21 @@ import threading
 import uuid
 from typing import Generator
 
+from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.tracing import get_tracer, setup_tracing
+from app.common.utils.logger import setup_logger
 from app.config import CFG
 from app.db.repositories.session_repository import get_session_repo
-from app.domain.agent.impl.pipeline import Pipeline
 from app.domain.agent.impl.persistence import persist_conversation
+from app.domain.agent.impl.pipeline import Pipeline
 from app.domain.agent.utils.agent_utils import stream_with_capture
 from app.domain.eval.impl.eval_impl import EvalImpl
 from app.domain.provider.impl.ollama_provider import Provider
-from app.registry.guardrail_registry import GUARDRAIL_FUNCTIONS
 from app.enums.errors.agent import AgentErrorType
 from app.enums.eval import EvalResultKey, RetrievalDocKey
 from app.enums.prompts import JsonKey
 from app.enums.tools import ToolKey
-from app.common.decorators.errors import catch_and_log_errors
-from app.common.decorators.tracing import get_tracer, setup_tracing
-from app.common.utils.logger import setup_logger
+from app.registry.guardrail_registry import GUARDRAIL_FUNCTIONS
 
 # Setup instrumentation
 logger = setup_logger()
@@ -81,13 +81,17 @@ class AgentImpl:
         self.pipeline = Pipeline()
 
     @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_STREAM_CAPTURE})
-    def run(self, user_input: str, session_id: str | None = None) -> Generator[str, None, None]:
+    def run(
+        self, user_input: str, session_id: str | None = None
+    ) -> Generator[str, None, None]:
         """Stream a model response while capturing full output."""
         response_id = str(uuid.uuid4())
         message_id = str(uuid.uuid4())
         session_id = session_id or str(uuid.uuid4())
 
-        filtered_input, rendered_prompt, context_chunks, plan = self.pipeline.build(user_input)
+        filtered_input, rendered_prompt, context_chunks, plan = self.pipeline.build(
+            user_input
+        )
         response = self.provider.stream(rendered_prompt)
 
         def _on_stream_complete(final_response: str) -> None:

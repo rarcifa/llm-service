@@ -19,7 +19,6 @@ from app.domain.safety.utils.pii_filter import redact_pii
 from app.domain.safety.utils.profanity_filter import filter_profanity
 from app.enums.tools import ToolName
 
-
 GUARDRAIL_FUNCTIONS: Dict[str, Dict[str, Callable | str]] = {
     ToolName.PROMPT_INJECTION_DETECTOR: {
         "function": detect_prompt_injection,

@@ -17,11 +17,11 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from app.common.decorators.errors import catch_and_log_errors
 from app.db.models.message import MessageModel
 from app.db.models.session import SessionModel
 from app.db.postgres import SessionLocal
 from app.enums.errors.session_repository import SessionRepoErrorType
-from app.common.decorators.errors import catch_and_log_errors
 
 
 class SessionRepository:

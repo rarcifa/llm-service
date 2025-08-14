@@ -46,7 +46,6 @@ class EvalImpl(EvalBase):
         trace_id = str(uuid.uuid4())
         timestamp = datetime.datetime.utcnow().isoformat()
 
-
         # Compute scores with config injected (no utils->config imports)
         scores = compute_scores(
             filtered_input=filtered_input,
@@ -85,9 +84,15 @@ class EvalImpl(EvalBase):
             retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_DOCS_COUNT] = len(retrieval["docs"])  # type: ignore[arg-type]
             if retrieval["docs"]:  # type: ignore[index]
                 top_doc = retrieval["docs"][0]  # type: ignore[index]
-                retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_TOP_CHUNK] = top_doc.get("chunk", "")[:100]
-                retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_TOP_SCORE] = top_doc.get("score")
-                retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_TOP_SOURCE] = top_doc.get("source")
+                retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_TOP_CHUNK] = top_doc.get(
+                    "chunk", ""
+                )[:100]
+                retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_TOP_SCORE] = top_doc.get(
+                    "score"
+                )
+                retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_TOP_SOURCE] = top_doc.get(
+                    "source"
+                )
 
         trace_eval_span(meta, {**scores, **retrieval_trace_attrs})
         return {**scores, "retrieval": retrieval}

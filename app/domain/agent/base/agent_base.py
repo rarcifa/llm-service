@@ -17,7 +17,9 @@ class AgentBase(ABC):
     """Abstract interface for agent pipeline assembly."""
 
     @abstractmethod
-    def build(self, user_input: str) -> Tuple[str, str, List[str], List[Dict[str, Any]]]:
+    def build(
+        self, user_input: str
+    ) -> Tuple[str, str, List[str], List[Dict[str, Any]]]:
         """Assemble sanitized input, rendered prompt, context chunks, and tool plan.
 
         Args:

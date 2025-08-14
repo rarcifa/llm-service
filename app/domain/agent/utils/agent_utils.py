@@ -9,18 +9,19 @@ Created: 2025-02-03
 """
 
 from __future__ import annotations
+
 from typing import Any, Callable, Generator, List
 
 from jinja2 import Template
 
+from app.common.decorators.errors import catch_and_log_errors
 from app.config import CFG
 from app.domain.provider.utils.provider_utils import verify_prompt_variables
 from app.domain.safety.utils.injection_detector import detect_prompt_injection
-from app.registry.guardrail_registry import GUARDRAIL_FUNCTIONS
 from app.enums.errors.agent import AgentErrorType
 from app.enums.prompts import PromptConfigKey
 from app.enums.tools import ToolKey, ToolName
-from app.common.decorators.errors import catch_and_log_errors
+from app.registry.guardrail_registry import GUARDRAIL_FUNCTIONS
 
 
 @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_SANITIZE_INPUT})
@@ -46,6 +47,7 @@ def render_prompt(filtered_input: str, context_chunks: List[str]) -> str:
     # You’d typically use PromptRegistry to load them — here assuming you want
     # the QA prompt (agent/qa) and its `name` placeholder.
     from app.registry.prompt_registry import PromptRegistry
+
     registry = PromptRegistry(base_path=str(CFG.prompts.registry_dir))
     qa_prompt = registry.get("agent/qa")
     qa_name = qa_prompt.get("name", "Agent")

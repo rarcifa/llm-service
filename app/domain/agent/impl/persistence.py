@@ -2,16 +2,20 @@
 
 from __future__ import annotations
 
+import hashlib
 import uuid
 from typing import Optional
 
-from app.config import CFG, Paths
+from app.config import CFG
+from app.db.repositories.pgvector_repository import get_pgvector_repo
 from app.db.repositories.session_repository import get_session_repo
-from app.db.repositories.vector_memory_repository import VectorMemoryRepository
-from app.domain.embeddings.impl.embeddings_impl import EmbeddingsImpl
-from app.domain.embeddings.utils.embeddings_utils import get_cached_embedding
-from app.domain.memory.impl.chroma_memory import MemoryImpl
+from app.domain.retrieval.utils.embeddings_utils import get_cached_embedding
 from app.enums.prompts import RoleKey
+
+
+def _sha256(s: str) -> str:
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()
+
 
 def persist_conversation(
     *,
@@ -21,7 +25,8 @@ def persist_conversation(
     tokens_used: Optional[int] = None,
     metadata: Optional[dict] = None,
 ) -> None:
-    """Persist the user/agent conversation to DB and semantic memory."""
+    """Persist the user/agent conversation to Postgres (relational + pgvector)."""
+    # 1) Relational history
     with get_session_repo() as repo:
         repo.get_or_create_session(session_id)
         repo.store_message(
@@ -41,15 +46,14 @@ def persist_conversation(
             metadata=metadata,
         )
 
-    # 2) Vector index (Chroma) — storage-only via repo
-    vrepo = VectorMemoryRepository(
-        path=str(CFG.paths.vector_store_dir),
-        collection_name=CFG.memory.collection_name,
-    )
+    # 2) Vector index (pgvector)
     emb = get_cached_embedding(response)
-    vrepo.upsert_vectors(
-        ids=[str(uuid.uuid4())],
-        embeddings=[emb],
-        documents=[response],
-        metadatas=[{"session_id": session_id, **(metadata or {})}],
-    )
+    with get_pgvector_repo(distance="cosine") as vrepo:
+        vrepo.upsert(
+            session_id=session_id,
+            collection=CFG.memory.collection_name,
+            embedding=emb,
+            document=response,
+            metadata={"session_id": session_id, **(metadata or {})},
+            content_sha256=_sha256(response),
+        )

@@ -1,12 +1,15 @@
 # app/config.py
 from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
+
 import yaml
 
 from app.registry.prompt_registry import PromptRegistry
 
 MANIFEST_PATH = Path("manifest.yaml")
+
 
 @dataclass(frozen=True)
 class Paths:
@@ -15,6 +18,7 @@ class Paths:
     prompt_dir: Path
     vector_store_dir: Path
     feedback_path: Path
+
 
 @dataclass(frozen=True)
 class ModelCfg:
@@ -33,25 +37,31 @@ class MemoryCfg:
     expiry_minutes: int
     persistence_dir: Path
 
+
 @dataclass(frozen=True)
 class Models:
     main: ModelCfg
     eval: ModelCfg
 
+
 @dataclass(frozen=True)
 class RetrievalCfg:
     enabled: bool
+    backend: str  # NEW: "postgres" | "chroma"
     docs_path: Path
     chunk_size: int
     include_ext: tuple[str, ...]
     embeddings_model: str
     embeddings_provider: str
+    embeddings_dim: int  # NEW
+
 
 @dataclass(frozen=True)
 class GuardrailsCfg:
     input_prompt_injection_patterns: tuple[str, ...]
     input_profanity_list: tuple[str, ...]
     output_filters: tuple[dict, ...]
+
 
 @dataclass(frozen=True)
 class EvalCfg:
@@ -60,11 +70,13 @@ class EvalCfg:
     grounding_min: int
     evals: tuple[dict, ...]
 
+
 @dataclass(frozen=True)
 class LoggingCfg:
     level: str
     format: str
     sinks: tuple[dict, ...]
+
 
 @dataclass(frozen=True)
 class ToolSpec:
@@ -72,10 +84,12 @@ class ToolSpec:
     module: str
     class_: str
 
+
 @dataclass(frozen=True)
 class ToolsCfg:
     enabled: bool
     registry: tuple[ToolSpec, ...]
+
 
 @dataclass(frozen=True)
 class PluginSpec:
@@ -84,17 +98,20 @@ class PluginSpec:
     class_: str
     enabled: bool
 
+
 @dataclass(frozen=True)
 class PromptData:
     name: str
     template: str
     placeholders: tuple[str, ...]
-    
+
+
 @dataclass(frozen=True)
 class PromptsCfg:
     registry_dir: Path
     files: tuple[str, ...]
-    loaded: dict[str, PromptData] 
+    loaded: dict[str, PromptData]
+
 
 @dataclass(frozen=True)
 class AppCfg:
@@ -112,6 +129,7 @@ class AppCfg:
     plugins: tuple[PluginSpec, ...]
     logging: LoggingCfg
 
+
 def _as_model(cfg: dict, key: str) -> ModelCfg:
     m = cfg["models"][key]
     return ModelCfg(
@@ -120,6 +138,7 @@ def _as_model(cfg: dict, key: str) -> ModelCfg:
         temperature=float(m.get("temperature", 0.0)),
         max_tokens=int(m.get("max_tokens", 1024)),
     )
+
 
 def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
     data = yaml.safe_load(path.read_text())
@@ -155,18 +174,21 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
     ret = data["retrieval"]
     retrieval = RetrievalCfg(
         enabled=bool(ret["enabled"]),
+        backend=str(ret.get("backend", "postgres")),
         docs_path=Path(ret["docs_path"]),
         chunk_size=int(ret["chunk_size"]),
         include_ext=tuple(ret["include_ext"]),
         embeddings_model=ret["embeddings"]["model"],
         embeddings_provider=ret["embeddings"]["provider"],
+        embeddings_dim=int(ret["embeddings"].get("dim", 384)),
     )
-
     # guardrails
     gr = data["guardrails"]
     input_filters = gr.get("input_filters", {})
     guardrails = GuardrailsCfg(
-        input_prompt_injection_patterns=tuple(input_filters.get("prompt_injection_patterns", [])),
+        input_prompt_injection_patterns=tuple(
+            input_filters.get("prompt_injection_patterns", [])
+        ),
         input_profanity_list=tuple(input_filters.get("profanity_list", [])),
         output_filters=tuple(gr.get("output_filters", [])),
     )
@@ -194,9 +216,7 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
             placeholders=tuple(content.get("placeholders", [])),
         )
     prompts = PromptsCfg(
-        registry_dir=registry_dir,
-        files=tuple(pr["files"]),
-        loaded=loaded_prompts
+        registry_dir=registry_dir, files=tuple(pr["files"]), loaded=loaded_prompts
     )
 
     # tools
@@ -212,7 +232,10 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
     # plugins
     plugins = tuple(
         PluginSpec(
-            name=pl["name"], module=pl["module"], class_=pl["class"], enabled=bool(pl["enabled"])
+            name=pl["name"],
+            module=pl["module"],
+            class_=pl["class"],
+            enabled=bool(pl["enabled"]),
         )
         for pl in data.get("plugins", [])
     )
@@ -240,6 +263,7 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
         plugins=plugins,
         logging=logging,
     )
+
 
 # Export a singleton for convenience
 CFG = load_config()

@@ -1,15 +1,15 @@
-# manifest.yaml
 name: document_qa_assistant
-version: 1.1.0
+version: 1.2.0
 description: |
   Answers domain-specific questions by retrieving context from indexed documents.
 
-paths: &paths
-  data_dir: data
-  logs_dir: logs
-  prompt_dir: prompts
-  vector_store_dir: chroma_memory
-  feedback_path: feedback/feedback.jsonl
+# Reusable path anchors (each is a single string, not the whole mapping)
+paths:
+  data_dir: &DATA_DIR data
+  logs_dir: &LOGS_DIR logs
+  prompt_dir: &PROMPT_DIR prompts
+  vector_store_dir: &VSTORE_DIR chroma_memory
+  feedback_path: &FEEDBACK feedback/feedback.jsonl
 
 models:
   defaults: &model_defaults
@@ -30,23 +30,44 @@ models:
 
 memory:
   enabled: true
-  backend: chromadb
+  backend: postgres # {chroma|postgres} — used by orchestrator/retriever wiring
   collection_name: agent_docs
   window_size: 3
   expiry_minutes: 90
-  persistence_dir: *paths
-  # the orchestrator will use paths.vector_store_dir
+  # For chroma we persist under paths.vector_store_dir
+  persistence_dir: *VSTORE_DIR
 
 retrieval:
   enabled: true
-  docs_path: data
+  backend: postgres # {chroma|postgres}; current code uses postgres
+  docs_path: *DATA_DIR
   chunk_size: 300
   include_ext:
     - "*.txt"
     - "*.md"
+
   embeddings:
-    model: all-MiniLM-L6-v2
     provider: sentence-transformers
+    model: all-MiniLM-L6-v2
+    dim: 384 # helpful for pgvector validation and diagnostics
+    device: auto # optional hint for your loader ("cpu"|"cuda"|"mps"|"auto")
+
+  # Backend-specific options (safe to keep even if unused)
+  chroma:
+    metric: cosine # cosine | l2 | ip
+
+  postgres:
+    distance: cosine # l2 | ip | cosine (maps to vector_*_ops)
+    index:
+      type: hnsw # hnsw | ivfflat
+      params:
+        m: 16
+        ef_construction: 64
+      runtime:
+        ef_search: 40
+    ivfflat:
+      lists: 100
+      probes: 10
 
 guardrails:
   input_filters:
@@ -64,6 +85,8 @@ guardrails:
   output_filters:
     - type: regex
       pattern: "(api_key|password|secret)[=:]\\S+"
+      replace: "[SECRET]"
+      ignore_case: true
 
 eval:
   enabled: true
@@ -81,7 +104,7 @@ eval:
       type: regex_filter
 
 prompts:
-  registry_dir: *paths
+  registry_dir: *PROMPT_DIR
   files:
     - agent/system
     - agent/qa

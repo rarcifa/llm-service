@@ -68,7 +68,9 @@ class ToolPlanner(ToolPlannerBase):
             tool = step.get("tool")
             if tool in valid_names:
                 input_val = step.get("input", None)
-                if input_val is None or (isinstance(input_val, str) and not input_val.strip()):
+                if input_val is None or (
+                    isinstance(input_val, str) and not input_val.strip()
+                ):
                     # leave input absent so StepExecutor uses the previous tool's output
                     cleaned.append({"tool": tool})
                 else:
@@ -87,7 +89,9 @@ class ToolPlanner(ToolPlannerBase):
         s = raw.strip()
         # Strip fences
         if s.startswith("```"):
-            s = re.sub(r"^```(?:json)?\s*|\s*```$", "", s, flags=re.IGNORECASE | re.MULTILINE).strip()
+            s = re.sub(
+                r"^```(?:json)?\s*|\s*```$", "", s, flags=re.IGNORECASE | re.MULTILINE
+            ).strip()
 
         # Fast path
         try:
