@@ -14,7 +14,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.enums.errors.postgres import PostgresErrorType
-from app.lib.utils.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import catch_and_log_errors
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://postgres:postgres@localhost/llm_db"

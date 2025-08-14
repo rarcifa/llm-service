@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 import yaml
 
-from app.registry.prompt_registry import PromptRegistry
+from app.domain.embeddings.impl.embeddings_impl import EmbeddingsImpl
+from app.domain.memory.impl.chroma_memory import MemoryImpl
 
 MANIFEST_PATH = Path("manifest.yaml")
 
@@ -22,16 +23,6 @@ class ModelCfg:
     model_id: str
     temperature: float
     max_tokens: int
-
-
-@dataclass(frozen=True)
-class MemoryCfg:
-    enabled: bool
-    backend: str
-    collection_name: str
-    window_size: int
-    expiry_minutes: int
-    persistence_dir: Path
 
 @dataclass(frozen=True)
 class Models:
@@ -85,16 +76,9 @@ class PluginSpec:
     enabled: bool
 
 @dataclass(frozen=True)
-class PromptData:
-    name: str
-    template: str
-    placeholders: tuple[str, ...]
-    
-@dataclass(frozen=True)
 class PromptsCfg:
     registry_dir: Path
     files: tuple[str, ...]
-    loaded: dict[str, PromptData] 
 
 @dataclass(frozen=True)
 class AppCfg:
@@ -142,13 +126,11 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
 
     # memory
     mem = data["memory"]
-    memory = MemoryCfg(
-        enabled=bool(mem["enabled"]),
-        backend=mem["backend"],
+    vector_Store = EmbeddingsImpl(path=mem["docs_path"],)
+    memory = MemoryImpl(
+        store=vector_Store,
         collection_name=mem["collection_name"],
-        window_size=int(mem["window_size"]),
-        expiry_minutes=int(mem["expiry_minutes"]),
-        persistence_dir=paths.vector_store_dir,
+        window_size=3,  
     )
 
     # retrieval
@@ -183,20 +165,9 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
 
     # prompts
     pr = data["prompts"]
-    registry_dir = paths.prompt_dir
-    registry = PromptRegistry(base_path=str(registry_dir))
-    loaded_prompts = {}
-    for key in pr["files"]:
-        content = registry.get(key)
-        loaded_prompts[key] = PromptData(
-            name=content.get("name", ""),
-            template=content.get("template", ""),
-            placeholders=tuple(content.get("placeholders", [])),
-        )
     prompts = PromptsCfg(
-        registry_dir=registry_dir,
+        registry_dir=paths.prompt_dir,
         files=tuple(pr["files"]),
-        loaded=loaded_prompts
     )
 
     # tools

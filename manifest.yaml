@@ -1,79 +1,115 @@
+# manifest.yaml
 name: document_qa_assistant
-version: 1.0.0
+version: 1.1.0
 description: |
   Answers domain-specific questions by retrieving context from indexed documents.
 
+paths: &paths
+  data_dir: data
+  logs_dir: logs
+  prompt_dir: prompts
+  vector_store_dir: chroma_memory
+  feedback_path: feedback/feedback.jsonl
+
 models:
-  main:
+  defaults: &model_defaults
     provider: ollama
-    model_id: llama3
-    temperature: 0.3
+    temperature: 0.2
     max_tokens: 1024
 
+  main:
+    <<: *model_defaults
+    model_id: llama3
+    temperature: 0.3
+
   eval:
-    provider: ollama
+    <<: *model_defaults
     model_id: phi3-mini
     temperature: 0.0
     max_tokens: 512
 
-  embedding:
-    provider: sentence-transformers
-    model_id: all-MiniLM-L6-v2
-
-  rag:
-    provider: sentence-transformers
-    model_id: all-MiniLM-L6-v2
+memory:
+  enabled: true
+  backend: chromadb
+  collection_name: agent_docs
+  window_size: 3
+  expiry_minutes: 90
+  persistence_dir: *paths
+  # the orchestrator will use paths.vector_store_dir
 
 retrieval:
   enabled: true
-  vector_store: chromadb
-  chunk_size: 512
-
-tools:
-  - name: search_docs
-    description: Retrieve documents from vector DB based on user query
-    permissions: read_only
-  - name: pii_redactor
-    description: Redacts PII from user inputs before LLM invocation
-    permissions: transformation
-  - name: ask_docs
-    description: Ask embedded docs using LlamaIndex
-    permissions: read_only
-
-memory:
-  type: vector
-  persistence: chromadb
-  window_size: 3
-  expiry_minutes: 90
+  docs_path: data
+  chunk_size: 300
+  include_ext:
+    - "*.txt"
+    - "*.md"
+  embeddings:
+    model: all-MiniLM-L6-v2
+    provider: sentence-transformers
 
 guardrails:
-  prompt_injection_detection: rebuff
-  pii_filter: presidio
+  input_filters:
+    prompt_injection_patterns:
+      - "(ignore|disregard)\\s+previous\\s+instructions"
+      - "(you are|pretend to be)\\s+a\\s+.*"
+      - "(delete|disable|shutdown).*"
+      - "(prompt|system):"
+      - "(simulate|emulate)\\s+.*"
+    profanity_list:
+      - "damn"
+      - "hell"
+      - "shit"
+      - "fuck"
   output_filters:
-    - profanity_filter
-    - hallucination_blocker
+    - type: regex
+      pattern: "(api_key|password|secret)[=:]\\S+"
 
 eval:
   enabled: true
-  framework: phoenix
-  use_llm_judge: true
-  use_grounding_score: true
   thresholds:
-    grounding_pass: 0.7
-    grounding_fail: 0.4
-    helpfulness_pass: 4
-    helpfulness_fail: 2
+    helpfulness_min: 3
+    grounding_min: 3
   evals:
     - name: helpfulness
       type: llm-judge
-    - name: safety
-      type: regex_filter
+      model: eval # alias of models.eval
     - name: grounding
       type: semantic_similarity
+      model: eval
+    - name: safety
+      type: regex_filter
+
+prompts:
+  registry_dir: *paths
+  files:
+    - agent/system
+    - agent/qa
+    - agent/planner
+    - eval/helpfulness
+    - eval/grounding
+    - reviewer/relevance
+
+tools:
+  enabled: true
+  registry:
+    - name: search_docs
+      module: app.services.search
+      class: SearchDocsTool
+    - name: summarize
+      module: app.services.summarize
+      class: SummarizeTool
+
+plugins:
+  # Domain-specific capability packs. Each plugin can expose tools, routes, pipelines.
+  - name: docs_qa
+    module: app.domain.docs
+    class: DocsQADomain
+    enabled: true
 
 logging:
   level: info
   format: json
   sinks:
-    - file: logs/agent_run.log
     - stdout: true
+    - file: logs/agent_run.log

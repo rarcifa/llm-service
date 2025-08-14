@@ -1,4 +1,5 @@
-from app.lib.agent.agent_runner import AgentRunner
+
+from app.domain.agent.impl.agent_impl import AgentImpl
 
 
 class ChatService:
@@ -12,7 +13,7 @@ class ChatService:
     """
 
     def __init__(self):
-        self.runner = AgentRunner()
+        self.agent_impl = AgentImpl()
 
     def chat(self, user_input: str, session_id: str = None):
         """
@@ -25,7 +26,7 @@ class ChatService:
         Returns:
             Generator[str]: Streamed output from the model.
         """
-        return self.runner.run(user_input, session_id)
+        return self.agent_impl.run(user_input, session_id)
 
 
 # Singleton instance
