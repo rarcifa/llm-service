@@ -1,39 +1,53 @@
-"""
-tool_registry.py
+from __future__ import annotations
+import importlib
+from dataclasses import dataclass
+from typing import Any, Callable, Dict
+from app.config import CFG
 
-Defines a central registry of available tools that can be invoked dynamically by name.
-Each tool entry includes:
-- A callable function reference
-- A human-readable description of what the tool does
+@dataclass(frozen=True)
+class LoadedTool:
+    name: str
+    description: str
+    when_to_use: str
+    args_schema: Dict[str, Any]
+    handler: Callable[..., Any]
 
-This registry supports systems that dispatch tools (e.g., via tool names in prompts or config).
+def _resolve_callable(module: str, class_: str | None, entrypoint: str) -> Callable[..., Any]:
+    mod = importlib.import_module(module)
+    if class_:
+        cls = getattr(mod, class_)
+        instance = cls()  # extend here if you want DI
+        fn = getattr(instance, entrypoint, None) or getattr(instance, "__call__", None)
+        if not callable(fn):
+            raise AttributeError(f"{module}.{class_}.{entrypoint} is not callable")
+        return fn
+    # module-level function
+    fn = getattr(mod, entrypoint)
+    if not callable(fn):
+        raise AttributeError(f"{module}.{entrypoint} is not callable")
+    return fn
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
-"""
+def load_tools_from_manifest() -> Dict[str, LoadedTool]:
+    if not CFG.tools.enabled:
+        return {}
+    out: Dict[str, LoadedTool] = {}
+    for t in CFG.tools.registry:
+        handler = _resolve_callable(t.module, t.class_, t.entrypoint or "run")
+        out[t.name] = LoadedTool(
+            name=t.name,
+            description=t.description,
+            when_to_use=t.when_to_use,
+            args_schema=t.args_schema,
+            handler=handler,
+        )
+    return out
 
-from typing import Callable, Dict
-
-from app.domain.retrieval.impl.rag_retriever_impl import RagRetrieverImpl
-from app.domain.tools.utils.calculator import calculator_tool
-
-retriever = RagRetrieverImpl()
-
-TOOL_FUNCTIONS: Dict[str, Dict[str, Callable | str]] = {
-    "search_docs": {
-        "function": retriever.retrieve,
-        "description": "Retrieves relevant documents or context from the vector store.",
-    },
-    "summarize": {
-        "function": lambda input: f"[summarize called with: {input}]",
-        "description": "Summarizes a long passage into a short summary.",
-    },
-    "calculator": {
-        "function": calculator_tool,
-        "description": "Performs basic arithmetic or evaluation of math expressions.",
-    },
-    "ask_docs": {
-        "function": retriever.query,
-        "description": "Ask the embedded document index via LlamaIndex RAG pipeline.",
-    },
-}
+def build_tool_cards(registry: Dict[str, LoadedTool]) -> str:
+    import json
+    cards = [{
+        "name": r.name,
+        "description": r.description,
+        "when_to_use": r.when_to_use,
+        "args_schema": r.args_schema,
+    } for r in registry.values()]
+    return json.dumps(cards, ensure_ascii=False)

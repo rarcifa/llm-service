@@ -116,12 +116,44 @@ prompts:
 tools:
   enabled: true
   registry:
+    - name: ask_docs
+      module: app.domain.retrieval.impl.rag_retriever_impl
+      class: RagRetrieverImpl # instantiate and call .query
+      entrypoint: query
+      description: Answer a question using your indexed documents (RAG).
+      when_to_use: Use when the question likely depends on uploaded/indexed docs.
+      args_schema:
+        type: object
+        properties:
+          input: { type: string }
+          top_k: { type: integer, minimum: 1, maximum: 10 }
+        required: [input]
+        additionalProperties: false
+
     - name: search_docs
-      module: app.services.search
-      class: SearchDocsTool
-    - name: summarize
-      module: app.services.summarize
-      class: SummarizeTool
+      module: app.domain.retrieval.impl.rag_retriever_impl
+      class: RagRetrieverImpl
+      entrypoint: retrieve
+      description: Retrieve the top matching chunks from the doc index.
+      when_to_use: Use to fetch relevant snippets before summarizing.
+      args_schema:
+        type: object
+        properties:
+          input: { type: string }
+          top_k: { type: integer, minimum: 1, maximum: 10 }
+        required: [input]
+        additionalProperties: false
+
+    - name: calculator
+      module: app.domain.tools.utils.calculator
+      entrypoint: calculator_tool # module-level function
+      description: Perform precise calculations or unit conversions.
+      when_to_use: Use when exact math is needed.
+      args_schema:
+        type: object
+        properties: { expression: { type: string } }
+        required: [expression]
+        additionalProperties: false
 
 plugins:
   # Domain-specific capability packs. Each plugin can expose tools, routes, pipelines.

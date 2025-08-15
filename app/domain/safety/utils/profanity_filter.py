@@ -1,4 +1,3 @@
-# app/domain/safety/utils/profanity_filter.py
 """Simple profanity masking (manifest-driven)."""
 from __future__ import annotations
 

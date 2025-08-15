@@ -3,8 +3,8 @@
 Author: Ricardo Arcifa
 Created: 2025-08-07
 """
-
 from __future__ import annotations
+
 
 from abc import ABC, abstractmethod
 from typing import List

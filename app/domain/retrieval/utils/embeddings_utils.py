@@ -1,6 +1,6 @@
 """Utility functions for sentence embedding models and cached encodes."""
-
 from __future__ import annotations
+
 
 from functools import lru_cache
 from typing import List

@@ -1,4 +1,3 @@
-# app/domain/safety/utils/injection_detector.py
 """Pattern-based prompt-injection detection (manifest-driven)."""
 from __future__ import annotations
 

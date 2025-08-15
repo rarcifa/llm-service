@@ -1,6 +1,6 @@
 """Persistence helpers for agent conversations (impl layer)."""
-
 from __future__ import annotations
+
 
 import hashlib
 import uuid

@@ -3,8 +3,8 @@
 Author: Ricardo Arcifa
 Created: 2025-02-03
 """
-
 from __future__ import annotations
+
 
 from typing import List
 

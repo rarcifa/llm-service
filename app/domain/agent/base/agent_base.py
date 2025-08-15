@@ -6,8 +6,8 @@ and the final rendered prompt. No concrete deps or config here.
 Author: Ricardo Arcifa
 Created: 2025-02-03
 """
-
 from __future__ import annotations
+
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Tuple

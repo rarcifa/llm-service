@@ -5,8 +5,8 @@ Reads config, computes scores via utils, and emits tracing metadata.
 Author: Ricardo Arcifa
 Created: 2025-02-03
 """
-
 from __future__ import annotations
+
 
 import datetime
 import uuid

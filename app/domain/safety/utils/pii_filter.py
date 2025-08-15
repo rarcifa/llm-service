@@ -1,4 +1,3 @@
-# app/domain/safety/utils/pii_filter.py
 """PII redaction with Presidio (pure transform)."""
 from __future__ import annotations
 

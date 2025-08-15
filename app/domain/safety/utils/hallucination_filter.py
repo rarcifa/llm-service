@@ -1,4 +1,3 @@
-# app/domain/safety/utils/hallucination_filter.py
 """Hallucination risk tagger."""
 from __future__ import annotations
 

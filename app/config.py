@@ -1,7 +1,7 @@
-# app/config.py
 from __future__ import annotations
+# app/config.py
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 import yaml
@@ -82,7 +82,20 @@ class LoggingCfg:
 class ToolSpec:
     name: str
     module: str
-    class_: str
+    # Optional: either supply a class (we'll instantiate it), or omit and use a module function.
+    class_: str | None = None
+    # Optional: method on the class instance OR function name on the module (defaults to "run").
+    entrypoint: str | None = None
+    # Optional routing metadata for planner cards:
+    description: str = ""
+    when_to_use: str = ""
+    # Optional JSON Schema for args (validated before execution)
+    args_schema: dict = field(default_factory=lambda: {
+        "type": "object",
+        "properties": {"input": {"type": "string"}},
+        "required": [],
+        "additionalProperties": True,
+    })
 
 
 @dataclass(frozen=True)
@@ -224,7 +237,20 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
     tools = ToolsCfg(
         enabled=bool(tl["enabled"]),
         registry=tuple(
-            ToolSpec(name=t["name"], module=t["module"], class_=t["class"])
+            ToolSpec(
+                name=t["name"],
+                module=t["module"],
+                class_=t.get("class"),                    # optional
+                entrypoint=t.get("entrypoint", "run"),    # default "run"
+                description=t.get("description", ""),
+                when_to_use=t.get("when_to_use", ""),
+                args_schema=t.get("args_schema", {
+                    "type": "object",
+                    "properties": {"input": {"type": "string"}},
+                    "required": [],
+                    "additionalProperties": True,
+                }),
+            )
             for t in tl["registry"]
         ),
     )
@@ -239,7 +265,7 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
         )
         for pl in data.get("plugins", [])
     )
-
+    
     # logging
     lg = data["logging"]
     logging = LoggingCfg(

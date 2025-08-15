@@ -1,5 +1,5 @@
-# app/domain/ingestion/impl/pgvector_ingester.py
 from __future__ import annotations
+# app/domain/ingestion/impl/pgvector_ingester.py
 
 import hashlib
 import uuid

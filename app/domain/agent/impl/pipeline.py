@@ -2,8 +2,8 @@
 
 Composes sanitize → plan → (optional) tool exec → memory context → render prompt.
 """
-
 from __future__ import annotations
+
 
 from typing import Any, Dict, List, Tuple
 
@@ -13,7 +13,6 @@ from app.domain.agent.utils.agent_utils import render_prompt, sanitize_input
 from app.domain.memory.impl.pgvector_memory import MemoryImpl
 from app.domain.tools.impl.step_executor import StepExecutorImpl
 from app.domain.tools.impl.tool_planner import ToolPlanner
-from app.registry.tool_registry import TOOL_FUNCTIONS
 
 
 class Pipeline(AgentBase):
@@ -21,7 +20,7 @@ class Pipeline(AgentBase):
 
     def __init__(self) -> None:
         self.planner = ToolPlanner(use_llm=True)
-        self.step_executor = StepExecutorImpl(TOOL_FUNCTIONS)
+        self.step_executor = StepExecutorImpl()
         # pgvector-backed memory (no external repo DI needed)
         self.memory = MemoryImpl(window_size=CFG.memory.window_size)
 
