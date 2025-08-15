@@ -14,16 +14,20 @@ from jinja2 import Template
 
 from app.common.decorators.errors import catch_and_log_errors
 from app.config import config
+from app.constants.errors import (
+    AGENT_RENDER_PROMPT,
+    AGENT_SANITIZE_INPUT,
+    AGENT_STREAM_CAPTURE,
+)
 from app.domain.provider.utils.provider_utils import verify_prompt_variables
 from app.domain.safety.utils.injection_detector import detect_prompt_injection
 from app.domain.safety.utils.pii_filter import redact_pii
 from app.domain.safety.utils.profanity_filter import filter_profanity
-from app.enums.errors.agent import AgentErrorType
 from app.enums.prompts import PromptConfigKey
 from app.enums.tools import ToolKey, ToolName
 
 
-@catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_SANITIZE_INPUT})
+@catch_and_log_errors(default_return={"error": AGENT_SANITIZE_INPUT})
 def sanitize_io(user_input: str) -> str:
     """Summary of `sanitize_io`.
 
@@ -44,7 +48,7 @@ def sanitize_io(user_input: str) -> str:
     return filtered or user_input.strip()
 
 
-@catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_RENDER_PROMPT})
+@catch_and_log_errors(default_return={"error": AGENT_RENDER_PROMPT})
 def render_prompt(filtered_input: str, context_chunks: List[str]) -> str:
     """Summary of `render_prompt`.
 
@@ -79,7 +83,7 @@ def render_prompt(filtered_input: str, context_chunks: List[str]) -> str:
     return prompt
 
 
-@catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_STREAM_CAPTURE})
+@catch_and_log_errors(default_return={"error": AGENT_STREAM_CAPTURE})
 def stream_with_capture(
     stream: Generator[str, None, None], on_complete: Callable[[str], Any] | None = None
 ) -> Generator[str, None, None]:

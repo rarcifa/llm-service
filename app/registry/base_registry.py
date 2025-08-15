@@ -8,7 +8,7 @@ Generated on 2025-08-15.
 
 from __future__ import annotations
 
-from typing import Dict, Generic, Iterable, List, Mapping, MutableMapping, TypeVar
+from typing import Generic, Iterable, List, MutableMapping, TypeVar
 
 ItemT = TypeVar("ItemT")
 

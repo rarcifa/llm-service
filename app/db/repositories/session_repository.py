@@ -14,10 +14,15 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from app.common.decorators.errors import catch_and_log_errors
+from app.constants.errors import (
+    SESSION_REPO_CREATE_SESSION,
+    SESSION_REPO_GET_MESSAGES,
+    SESSION_REPO_GET_SESSION_BY_ID,
+    SESSION_REPO_STORE_MESSAGE,
+)
 from app.db.models.message import MessageModel
 from app.db.models.session import SessionModel
 from app.db.postgres import SessionLocal
-from app.enums.errors.session_repository import SessionRepoErrorType
 
 
 class SessionRepository:
@@ -40,9 +45,7 @@ class SessionRepository:
         """
         self.db = db
 
-    @catch_and_log_errors(
-        default_return={"error": SessionRepoErrorType.SESSION_REPO_GET_SESSION_BY_ID}
-    )
+    @catch_and_log_errors(default_return={"error": SESSION_REPO_GET_SESSION_BY_ID})
     def get_session_by_id(self, session_id: UUID) -> Optional[SessionModel]:
         """Summary of `get_session_by_id`.
 
@@ -56,9 +59,7 @@ class SessionRepository:
         """
         return self.db.query(SessionModel).filter_by(id=session_id).first()
 
-    @catch_and_log_errors(
-        default_return={"error": SessionRepoErrorType.SESSION_REPO_CREATE_SESSION}
-    )
+    @catch_and_log_errors(default_return={"error": SESSION_REPO_CREATE_SESSION})
     def create_session(
         self, session_id: Optional[UUID] = None, metadata: Optional[dict] = None
     ) -> SessionModel:
@@ -79,9 +80,7 @@ class SessionRepository:
         self.db.refresh(session)
         return session
 
-    @catch_and_log_errors(
-        default_return={"error": SessionRepoErrorType.SESSION_REPO_CREATE_SESSION}
-    )
+    @catch_and_log_errors(default_return={"error": SESSION_REPO_CREATE_SESSION})
     def get_or_create_session(self, session_id: UUID) -> SessionModel:
         """Summary of `get_or_create_session`.
 
@@ -98,9 +97,7 @@ class SessionRepository:
             return session
         return self.create_session(session_id=session_id)
 
-    @catch_and_log_errors(
-        default_return={"error": SessionRepoErrorType.SESSION_REPO_STORE_MESSAGE}
-    )
+    @catch_and_log_errors(default_return={"error": SESSION_REPO_STORE_MESSAGE})
     def store_message(
         self,
         session_id: UUID,
@@ -142,9 +139,7 @@ class SessionRepository:
         self.db.refresh(message)
         return message
 
-    @catch_and_log_errors(
-        default_return={"error": SessionRepoErrorType.SESSION_REPO_GET_MESSAGES}
-    )
+    @catch_and_log_errors(default_return={"error": SESSION_REPO_GET_MESSAGES})
     def get_messages_for_session(self, session_id: UUID) -> List[MessageModel]:
         """Summary of `get_messages_for_session`.
 

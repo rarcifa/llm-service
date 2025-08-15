@@ -9,8 +9,6 @@ Generated on 2025-08-15.
 import json
 import logging
 
-from jinja2 import Template
-
 from app.common.error_handling import error_boundary
 from app.config import config
 from app.domain.provider.impl.ollama_provider import Provider

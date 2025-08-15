@@ -9,7 +9,7 @@ Generated on 2025-08-15.
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generator, List, Union
+from typing import Any, Dict, Generator, List
 
 Message = Dict[str, str]
 

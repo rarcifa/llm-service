@@ -8,7 +8,6 @@ Generated on 2025-08-15.
 
 from __future__ import annotations
 
-import re
 import threading
 import uuid
 from typing import Generator
@@ -17,16 +16,15 @@ from app.common.decorators.errors import catch_and_log_errors
 from app.common.decorators.tracing import get_tracer, setup_tracing
 from app.common.utils.logger import setup_logger
 from app.config import config
+from app.constants.errors import AGENT_STREAM_CAPTURE
 from app.db.repositories.session_repository import get_session_repo
 from app.domain.agent.impl.persistence import persist_conversation
 from app.domain.agent.impl.pipeline import Pipeline
-from app.domain.agent.utils.agent_utils import sanitize_io, stream_with_capture
+from app.domain.agent.utils.agent_utils import stream_with_capture
 from app.domain.eval.impl.eval_impl import EvalImpl
 from app.domain.provider.impl.ollama_provider import Provider
-from app.enums.errors.agent import AgentErrorType
 from app.enums.eval import EvalResultKey, RetrievalDocKey
 from app.enums.prompts import JsonKey
-from app.enums.tools import ToolKey
 
 logger = setup_logger()
 setup_tracing()
@@ -53,7 +51,7 @@ class AgentImpl:
         self.provider = Provider()
         self.pipeline = Pipeline()
 
-    @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_STREAM_CAPTURE})
+    @catch_and_log_errors(default_return={"error": AGENT_STREAM_CAPTURE})
     def run(
         self, user_input: str, session_id: str | None = None
     ) -> Generator[str, None, None]:

@@ -1,142 +1,311 @@
-# Project API Overview
+# Enterprise Agent: Modular LLM Service
 
-_Auto-generated on 2025-08-15 19:30:51Z_
-
-This documentation reflects the latest codebase after standardizing all docstrings to **Google style**.
-
-## Modules
-
-- `api/controllers/chat_controller.py` — Classes: **1**, Functions: **2**
-- `api/routes/chat_router.py` — Classes: **0**, Functions: **2**
-- `app/__init__.py` — Classes: **0**, Functions: **0**
-- `app/common/__init__.py` — Classes: **0**, Functions: **0**
-- `app/common/decorators/__init__.py` — Classes: **0**, Functions: **0**
-- `app/common/decorators/errors.py` — Classes: **0**, Functions: **1**
-- `app/common/decorators/retry.py` — Classes: **0**, Functions: **1**
-- `app/common/decorators/tracing.py` — Classes: **0**, Functions: **3**
-- `app/common/error_handling.py` — Classes: **1**, Functions: **1**
-- `app/common/http_errors.py` — Classes: **0**, Functions: **1**
-- `app/common/utils/__init__.py` — Classes: **0**, Functions: **0**
-- `app/common/utils/files.py` — Classes: **0**, Functions: **1**
-- `app/common/utils/logger.py` — Classes: **0**, Functions: **1**
-- `app/common/utils/strings.py` — Classes: **0**, Functions: **1**
-- `app/config.py` — Classes: **13**, Functions: **2**
-- `app/constants/__init__.py` — Classes: **0**, Functions: **0**
-- `app/constants/values.py` — Classes: **0**, Functions: **0**
-- `app/db/__init__.py` — Classes: **0**, Functions: **0**
-- `app/db/models/__init__.py` — Classes: **0**, Functions: **0**
-- `app/db/models/message.py` — Classes: **1**, Functions: **0**
-- `app/db/models/session.py` — Classes: **1**, Functions: **0**
-- `app/db/models/vector_record.py` — Classes: **1**, Functions: **0**
-- `app/db/postgres.py` — Classes: **0**, Functions: **2**
-- `app/db/repositories/__init__.py` — Classes: **0**, Functions: **0**
-- `app/db/repositories/pgvector_repository.py` — Classes: **1**, Functions: **4**
-- `app/db/repositories/session_repository.py` — Classes: **1**, Functions: **7**
-- `app/db/schemas/__init__.py` — Classes: **0**, Functions: **0**
-- `app/db/schemas/chat.py` — Classes: **1**, Functions: **0**
-- `app/db/schemas/message.py` — Classes: **3**, Functions: **0**
-- `app/db/schemas/session.py` — Classes: **4**, Functions: **0**
-- `app/domain/agent/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/agent/base/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/agent/base/agent_base.py` — Classes: **1**, Functions: **1**
-- `app/domain/agent/impl/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/agent/impl/agent_impl.py` — Classes: **1**, Functions: **3**
-- `app/domain/agent/impl/persistence.py` — Classes: **0**, Functions: **2**
-- `app/domain/agent/impl/pipeline.py` — Classes: **1**, Functions: **2**
-- `app/domain/agent/utils/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/agent/utils/agent_utils.py` — Classes: **0**, Functions: **3**
-- `app/domain/eval/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/eval/base/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/eval/base/eval_base.py` — Classes: **1**, Functions: **1**
-- `app/domain/eval/impl/eval_impl.py` — Classes: **1**, Functions: **1**
-- `app/domain/eval/utils/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/eval/utils/eval_utils.py` — Classes: **0**, Functions: **8**
-- `app/domain/ingestion/base/ingester_base.py` — Classes: **1**, Functions: **2**
-- `app/domain/ingestion/impl/chroma_ingester.py` — Classes: **1**, Functions: **7**
-- `app/domain/ingestion/utils/text.py` — Classes: **0**, Functions: **1**
-- `app/domain/memory/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/memory/base/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/memory/base/memory_base.py` — Classes: **1**, Functions: **2**
-- `app/domain/memory/impl/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/memory/impl/pgvector_memory.py` — Classes: **1**, Functions: **4**
-- `app/domain/provider/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/provider/base/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/provider/base/provider_base.py` — Classes: **1**, Functions: **1**
-- `app/domain/provider/impl/ollama_client.py` — Classes: **1**, Functions: **9**
-- `app/domain/provider/impl/ollama_provider.py` — Classes: **1**, Functions: **6**
-- `app/domain/provider/utils/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/provider/utils/provider_utils.py` — Classes: **0**, Functions: **1**
-- `app/domain/retrieval/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/retrieval/base/retriever_base.py` — Classes: **1**, Functions: **2**
-- `app/domain/retrieval/impl/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/retrieval/impl/rag_retriever_impl.py` — Classes: **1**, Functions: **2**
-- `app/domain/retrieval/utils/embeddings_utils.py` — Classes: **0**, Functions: **2**
-- `app/domain/safety/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/safety/base/safety_base.py` — Classes: **1**, Functions: **2**
-- `app/domain/safety/impl/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/safety/impl/injection_detector_impl.py` — Classes: **1**, Functions: **1**
-- `app/domain/safety/utils/hallucination_filter.py` — Classes: **0**, Functions: **1**
-- `app/domain/safety/utils/injection_detector.py` — Classes: **0**, Functions: **2**
-- `app/domain/safety/utils/pii_filter.py` — Classes: **0**, Functions: **1**
-- `app/domain/safety/utils/profanity_filter.py` — Classes: **0**, Functions: **3**
-- `app/domain/tools/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/tools/base/step_executor_base.py` — Classes: **1**, Functions: **1**
-- `app/domain/tools/base/tool_planner_base.py` — Classes: **1**, Functions: **1**
-- `app/domain/tools/impl/__init__.py` — Classes: **0**, Functions: **0**
-- `app/domain/tools/impl/step_executor.py` — Classes: **1**, Functions: **3**
-- `app/domain/tools/impl/tool_planner.py` — Classes: **1**, Functions: **3**
-- `app/domain/tools/utils/calculator.py` — Classes: **0**, Functions: **2**
-- `app/enums/__init__.py` — Classes: **0**, Functions: **0**
-- `app/enums/api.py` — Classes: **3**, Functions: **0**
-- `app/enums/errors/__init__.py` — Classes: **0**, Functions: **0**
-- `app/enums/errors/agent.py` — Classes: **1**, Functions: **0**
-- `app/enums/errors/eval.py` — Classes: **1**, Functions: **0**
-- `app/enums/errors/model.py` — Classes: **1**, Functions: **0**
-- `app/enums/errors/postgres.py` — Classes: **1**, Functions: **0**
-- `app/enums/errors/session_repository.py` — Classes: **1**, Functions: **0**
-- `app/enums/eval.py` — Classes: **11**, Functions: **0**
-- `app/enums/manifest.py` — Classes: **1**, Functions: **0**
-- `app/enums/model.py` — Classes: **1**, Functions: **0**
-- `app/enums/prompts.py` — Classes: **5**, Functions: **0**
-- `app/enums/tools.py` — Classes: **2**, Functions: **0**
-- `app/registry/__init__.py` — Classes: **0**, Functions: **0**
-- `app/registry/base_registry.py` — Classes: **3**, Functions: **8**
-- `app/registry/prompt_registry.py` — Classes: **2**, Functions: **4**
-- `app/registry/tool_registry.py` — Classes: **2**, Functions: **4**
-- `app/services/__init__.py` — Classes: **0**, Functions: **0**
-- `app/services/chat_service.py` — Classes: **1**, Functions: **2**
-- `cli.py` — Classes: **0**, Functions: **1**
-- `main.py` — Classes: **0**, Functions: **1**
-- `migrations/env.py` — Classes: **0**, Functions: **2**
-- `migrations/versions/09494a513e2f_merge_heads.py` — Classes: **0**, Functions: **2**
-- `migrations/versions/20250814_add_pgvector_vector_records.py` — Classes: **0**, Functions: **2**
-- `migrations/versions/2344c21b49f6_initial_schema.py` — Classes: **0**, Functions: **2**
-- `tests/test_runner.py` — Classes: **0**, Functions: **4**
-
-## Conventions
-
-- Docstrings follow the [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html#s3.8-comments-and-docstrings).
-- Each module, class, and function now has a concise summary line, followed by structured sections (`Args`, `Returns`, and `Raises` where applicable).
-- Existing outdated/placeholder docstrings were replaced to ensure consistency.
-
-## How to Use
-
-Read the docstrings directly in the code for the most accurate and up-to-date documentation. Tooling like IDEs, Sphinx (with napoleon), or pdoc will render these docstrings cleanly.
-
-## Build Docs Locally (Optional)
-
-You can render HTML docs using Sphinx and napoleon:
-```bash
-pip install sphinx sphinxcontrib-napoleon
-sphinx-quickstart  # if you don't already have a docs folder
-```
-Then set `extensions = ['sphinx.ext.napoleon']` in `conf.py`.
-
-## Summary
-
-- Files processed: **106**
-- Classes documented: **84**
-- Functions documented: **141**
+> An enterprise-grade framework for building LLM-powered agents with memory, tools, safety filters, evaluation, observability, and streaming interfaces.
 
 ---
-_This README was updated automatically to reflect the standardized docstrings across the project._
+
+## Architecture Overview
+
+This system follows a **modular, layered architecture** inspired by:
+
+- **Clean Architecture** (separation of concerns)
+- **LLM Agent Design Patterns** (LangServe, Haystack, OpenAgents)
+- **Microservice + Plugin Model** (modular evaluation, tools, memory, etc)
+
+### Layers
+
+```mermaid
+graph TD
+    subgraph Client
+        Z[Frontend / CLI / External App]
+    end
+
+    subgraph API_Layer
+        A[FastAPI Controller]
+    end
+
+    subgraph Guardrails
+        GA[Input Filters - PII, Injection, Profanity]
+    end
+
+    subgraph Agent_Layer
+        B[AgentRunner / Streamer]
+        B --> D[Async Eval Thread]
+    end
+
+    subgraph LLM_Pipeline
+        E[Prompt + Tools + Memory]
+        F[LLM Call via Ollama]
+    end
+
+    subgraph Persistence
+        G[PostgreSQL - Sessions]
+        H[Phoenix Tracing - OTLP]
+    end
+
+    Z -->|POST /chat| A --> GA --> B
+    B --> E --> F
+    B --> G
+    D --> H
+    B -->|Response| Z
+
+```
+
+---
+
+## Agent Flow
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant API
+    participant AgentRunner
+    participant LLM
+    participant EvalThread
+    participant DB
+    participant Phoenix
+
+    User->>API: POST /chat
+    API->>AgentRunner: invoke run()
+    AgentRunner->>LLM: prompt + context
+    LLM-->>AgentRunner: response
+    AgentRunner->>DB: store messages
+    AgentRunner-->>User: return response
+    Note right of AgentRunner: spawn background thread
+    AgentRunner->>EvalThread: evaluate in parallel
+    EvalThread->>Phoenix: trace eval results
+```
+
+---
+
+## Folder Structure
+
+### `app/` – Core Application Logic
+
+| Path          | Purpose                                                                             |
+| ------------- | ----------------------------------------------------------------------------------- |
+| `lib/agent/`  | Agent pipeline: prompt prep, LLM calls, streaming, background eval                  |
+| `lib/tools/`  | Tool functions, `tool_registry.py`, `tool_planner.py`, and custom tool logic        |
+| `lib/memory/` | Short-term memory (in-memory store or placeholder for vector memory)                |
+| `lib/model/`  | LLM wrappers like `model_runner.py`, with retry + streaming support                 |
+| `lib/eval/`   | `eval_runner.py` and scorers used in async eval phase                               |
+| `lib/safety/` | Guardrails: `guardrail_registry.py`, prompt injection, profanity, and PII detection |
+| `lib/utils/`  | Logger, UUIDs, decorators, etc                                                      |
+| `app/db/`     | SQLAlchemy models and repositories                                                  |
+| `services/`   | Business logic, like `chat_service.py`                                              |
+| `api/`        | FastAPI routes and controllers                                                      |
+
+### `migrations/`
+
+- Alembic-managed DB migrations
+- Migration commands:
+
+```bash
+# Create new migration from model changes
+./scripts/generate-migration.sh "message here"
+
+# Apply pending migrations
+./scripts/run-migrations.sh
+
+# Initialize DB (create if not exists and run migrations)
+./scripts/init-db.sh
+```
+
+### `prompts/`
+
+- YAML/Jinja2 system + user prompts (`agent_prompt.yaml`)
+
+### `config/`
+
+- Manifest (`manifest.yaml`) and `.env`-driven settings
+
+### `feedback/`
+
+- JSONL log of feedback (e.g., thumbs up/down)
+
+### `tests/`
+
+- Golden tests + CLI-based regression suite
+
+---
+
+## Agent Flow
+
+1. PII & prompt injection filter
+2. Memory + document retrieval
+3. ToolPlanner selects & calls matching tool (optional)
+4. Tool result injected into prompt context
+5. Prompt rendering (Jinja2)
+6. LLM call (sync or streaming)
+7. Store conversation in DB & memory
+8. Respond to user immediately
+9. Trigger evaluation in a background thread
+10. Emit OpenTelemetry span to Phoenix
+11. Feedback trace support
+
+---
+
+## Observability
+
+- **Phoenix** via OTLP gRPC
+- Traced spans for agent call, prompt, eval, tool use
+- Includes scores: `grounding`, `confidence`, `hallucination`, etc
+
+---
+
+## Guardrails
+
+The agent applies input and output filters based on the manifest:
+
+```yaml
+guardrails:
+  prompt_injection_detection: rebuff
+  pii_filter: presidio
+  output_filters:
+    - profanity_check
+    - hallucination_blocker
+```
+
+These are mapped to callable tools via guardrail_registry.py.
+
+- **Input**: Prompt injection + PII + profanity filters
+- **Output**: Hallucination blocking, custom regex filters
+
+## Safety Tooling
+
+| Name                    | Purpose                                 |
+| ----------------------- | --------------------------------------- |
+| `rebuff`                | Prompt injection detection              |
+| `presidio`              | PII redaction                           |
+| `profanity_check`       | Replaces/flags offensive content        |
+| `hallucination_blocker` | (Custom) filters misleading completions |
+
+## Design Philosophy
+
+- **Modular**: Add/remove tools, models, filters
+- **Traceable**: All responses are traced with UUIDs
+- **Extensible**: Plugin system for tools & evaluation
+- **Testable**: CI-ready golden test runner
+- **Eval-first**: Built-in LLM-as-a-Judge & grounding evals
+
+---
+
+## Built With
+
+- LLM: Ollama (supports streaming)
+- Vector DB: ChromaDB (in-memory or persisted)
+- Eval: Phoenix + LLM-as-a-Judge
+- Prompting: Jinja2 + YAML
+- Backend: FastAPI + Pydantic
+- Storage: PostgreSQL (via SQLAlchemy + Alembic)
+- Tracing: OTLP / OpenTelemetry
+
+---
+
+## Quickstart
+
+```bash
+git clone https://github.com/your-org/enterprise-agent
+cd enterprise-agent
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+### Configure Environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with:
+
+```
+DATABASE_URL=postgresql+psycopg2://postgres:yourpass@localhost:5432/enterprise_agent
+```
+
+### Start DB + Phoenix (Observability)
+
+```bash
+docker-compose up -d postgres phoenix
+```
+
+### Initialize Database
+
+```bash
+./scripts/init-db.sh
+```
+
+### Run App (API mode)
+
+```bash
+chmod +x scripts/run.sh
+./scripts/run.sh
+```
+
+### Run CLI prompt
+
+```bash
+python cli.py "What is CLM?"
+```
+
+---
+
+## Migration Management
+
+### Create a new migration from model changes
+
+```bash
+./scripts/generate-migration.sh "added new table"
+```
+
+### Apply pending migrations
+
+```bash
+./scripts/run-migrations.sh
+```
+
+---
+
+## API Endpoints
+
+| Method | Endpoint                 | Description              |
+| ------ | ------------------------ | ------------------------ |
+| POST   | `/chat`                  | Agent response           |
+| POST   | `/chat/stream`           | Streaming agent response |
+| POST   | `/feedback`              | Save feedback            |
+| GET    | `/feedback/{id}`         | Get feedback by ID       |
+| GET    | `/feedback`              | List + filter feedback   |
+| POST   | `/admin/load_documents`  | Upload documents to RAG  |
+| GET    | `/sessions/{session_id}` | Full session transcript  |
+
+---
+
+## Evaluation Outputs
+
+- `eval.rating`: pass/fail/neutral
+- `grounding_score`: 0.0–1.0
+- `helpfulness_score`: 0.0–1.0
+- `confidence_score`: avg(grounding + helpfulness)
+- `hallucination_risk`: low / medium / high
+
+All metrics are sent to Phoenix and can be traced per `trace_id`.
+
+---
+
+## Dev Notes
+
+- Use `scripts/generate-migration.sh` to generate schema changes
+- Use `scripts/run-migrations.sh` to apply them
+- Use `scripts/init-db.sh` to create the DB if missing
+- DB schema lives in `db/models/`
+- API + service schema lives in `api/controllers/` and `services/chat_service.py`
+
+---
+
+## Coming Soon
+
+- Streaming frontend (Streamlit or React)
+- Tool orchestration via planner
+- Agent-to-agent messaging
+- External API integrations

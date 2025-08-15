@@ -9,7 +9,7 @@ Generated on 2025-08-15.
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, Column, DateTime
+from sqlalchemy import Column, DateTime
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 

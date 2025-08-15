@@ -1,11 +1,6 @@
-"""Module documentation for `app/domain/tools/impl/step_executor.py`.
+from jsonschema import validate
 
-This module is part of an enterprise-grade, research-ready codebase.
-Docstrings follow the Google Python style guide for consistency and clarity.
-
-Generated on 2025-08-15.
-"""
-
+'"""Module documentation for `app/domain/tools/impl/step_executor.py`.\n\nThis module is part of an enterprise-grade, research-ready codebase.\nDocstrings follow the Google Python style guide for consistency and clarity.\n\nGenerated on 2025-08-15.\n"""'
 import logging
 from typing import Any, Dict, List
 
@@ -14,11 +9,6 @@ from app.domain.tools.base.step_executor_base import StepExecutorBase
 from app.registry.tool_registry import ToolRegistry
 
 logger = logging.getLogger(__name__)
-try:
-    from jsonschema import ValidationError, validate
-except Exception:
-    validate = None
-    ValidationError = Exception
 
 
 @error_boundary(map_to=None, reraise=False, default=False, log=False)

@@ -9,7 +9,6 @@ Generated on 2025-08-15.
 from __future__ import annotations
 
 import hashlib
-import uuid
 from datetime import datetime, timezone
 from typing import List
 

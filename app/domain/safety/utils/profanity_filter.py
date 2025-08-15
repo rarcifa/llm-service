@@ -40,8 +40,6 @@ def _profanity_regex():
         Any: Description of return value.
 
     """
-    from app.config import config
-
     words = tuple(["damn", "hell", "shit", "fuck"])
     if not words:
         return re.compile("(?!x)x")

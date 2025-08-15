@@ -18,20 +18,19 @@ from sentence_transformers import util
 
 from app.common.decorators.errors import catch_and_log_errors
 from app.config import config
+from app.constants.errors import (
+    COMPUTE_RATING,
+    HALLUCINATION_DETECTION,
+    SCORE_GROUNDEDNESS,
+    SCORE_HELPFULNESS,
+)
 from app.constants.values import OLLAMA_CLI, OLLAMA_CMD
 from app.domain.retrieval.utils.embeddings_utils import get_embedding_model
-from app.enums.errors.eval import EvalErrorType
-from app.enums.eval import (
-    GroundingKey,
-    HallucinationKey,
-    HelpfulnessKey,
-    RatingKey,
-    RetrievalSource,
-)
+from app.enums.eval import HallucinationKey, RatingKey, RetrievalSource
 from app.enums.prompts import ModelType, ScoreKey
 
 
-@catch_and_log_errors(default_return={"error": EvalErrorType.SCORE_GROUNDEDNESS})
+@catch_and_log_errors(default_return={"error": SCORE_GROUNDEDNESS})
 def score_groundedness_with_embeddings(
     response: str, retrieved_docs: list[str]
 ) -> float:
@@ -55,7 +54,7 @@ def score_groundedness_with_embeddings(
     return round(similarity, 3)
 
 
-@catch_and_log_errors(default_return={"error": EvalErrorType.SCORE_HELPFULNESS})
+@catch_and_log_errors(default_return={"error": SCORE_HELPFULNESS})
 def score_helpfulness_with_llm(
     *,
     prompt: str,
@@ -97,7 +96,7 @@ def score_helpfulness_with_llm(
     return result.stdout.decode().strip()
 
 
-@catch_and_log_errors(default_return={"error": EvalErrorType.COMPUTE_RATING})
+@catch_and_log_errors(default_return={"error": COMPUTE_RATING})
 def compute_rating(grounding_score: float, judgment: str) -> str:
     """Summary of `compute_rating`.
 
@@ -119,7 +118,7 @@ def compute_rating(grounding_score: float, judgment: str) -> str:
     return RatingKey.FAIL
 
 
-@catch_and_log_errors(default_return={"error": EvalErrorType.HALLUCINATION_DETECTION})
+@catch_and_log_errors(default_return={"error": HALLUCINATION_DETECTION})
 def detect_hallucination(response: str, retrieved_docs: list[str]) -> str:
     """Summary of `detect_hallucination`.
 

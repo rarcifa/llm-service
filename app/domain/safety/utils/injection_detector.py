@@ -29,8 +29,6 @@ def _compiled_injection_regexes():
         Any: Description of return value.
 
     """
-    from app.config import config
-
     patterns: Iterable[str] = [
         "(?i)\\b(ignore|bypass|override)\\b.*\\b(system|instruction)s?\\b",
         "(?i)\\b(disable|turn\\s*off)\\b.*\\b(guardrails|safety)\\b",
