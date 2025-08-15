@@ -17,7 +17,7 @@ from typing import Generator
 from app.common.decorators.errors import catch_and_log_errors
 from app.common.decorators.tracing import get_tracer, setup_tracing
 from app.common.utils.logger import setup_logger
-from app.config import CFG
+from app.config import config
 from app.db.repositories.session_repository import get_session_repo
 from app.domain.agent.impl.persistence import persist_conversation
 from app.domain.agent.impl.pipeline import Pipeline
@@ -28,7 +28,6 @@ from app.enums.errors.agent import AgentErrorType
 from app.enums.eval import EvalResultKey, RetrievalDocKey
 from app.enums.prompts import JsonKey
 from app.enums.tools import ToolKey
-from app.registry.guardrail_registry import GUARDRAIL_FUNCTIONS
 
 # Setup instrumentation
 logger = setup_logger()
@@ -67,14 +66,14 @@ class AgentImpl:
                 response=final_response,
                 tokens_used=len(final_response.split()),
                 metadata={
-                    "model_used": CFG.models.main.model_id,  # ensure string id
+                    "model_used": config.models.main.model_id,  # ensure string id
                     "tools_enabled": [step["tool"] for step in plan] if plan else [],
-                    "eval_enabled": CFG.eval.enabled,
+                    "eval_enabled": config.eval.enabled,
                 },
             )
 
             # 3) Optional background evaluation
-            if CFG.eval.enabled:
+            if config.eval.enabled:
                 threading.Thread(
                     target=self._background_eval,
                     kwargs={

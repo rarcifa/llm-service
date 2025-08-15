@@ -6,7 +6,7 @@ import hashlib
 import uuid
 from typing import Optional
 
-from app.config import CFG
+from app.config import config
 from app.db.repositories.pgvector_repository import get_pgvector_repo
 from app.db.repositories.session_repository import get_session_repo
 from app.domain.retrieval.utils.embeddings_utils import get_cached_embedding
@@ -51,7 +51,7 @@ def persist_conversation(
     with get_pgvector_repo(distance="cosine") as vrepo:
         vrepo.upsert(
             session_id=session_id,
-            collection=CFG.memory.collection_name,
+            collection=config.memory.collection_name,
             embedding=emb,
             document=response,
             metadata={"session_id": session_id, **(metadata or {})},

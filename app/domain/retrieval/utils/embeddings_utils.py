@@ -7,7 +7,7 @@ from typing import List
 
 from sentence_transformers import SentenceTransformer
 
-from app.config import CFG
+from app.config import config
 
 # Lazily initialized singleton model
 _model: SentenceTransformer | None = None
@@ -21,8 +21,8 @@ def get_embedding_model() -> SentenceTransformer:
     """
     global _model
     if _model is None:
-        # Read embedding model from CFG.retrieval.embeddings_model
-        _model = SentenceTransformer(CFG.retrieval.embeddings_model)
+        # Read embedding model from config.retrieval.embeddings_model
+        _model = SentenceTransformer(config.retrieval.embeddings_model)
     return _model
 
 

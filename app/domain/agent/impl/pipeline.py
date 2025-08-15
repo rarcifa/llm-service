@@ -7,7 +7,7 @@ from __future__ import annotations
 
 from typing import Any, Dict, List, Tuple
 
-from app.config import CFG
+from app.config import config
 from app.domain.agent.base.agent_base import AgentBase
 from app.domain.agent.utils.agent_utils import render_prompt, sanitize_io
 from app.domain.memory.impl.pgvector_memory import MemoryImpl
@@ -22,7 +22,7 @@ class Pipeline(AgentBase):
         self.planner = ToolPlanner(use_llm=True)
         self.step_executor = StepExecutorImpl()
         # pgvector-backed memory (no external repo DI needed)
-        self.memory = MemoryImpl(window_size=CFG.memory.window_size)
+        self.memory = MemoryImpl(window_size=config.memory.window_size)
 
     def build(
         self, user_input: str

@@ -9,7 +9,7 @@ from typing import Iterable, List, Optional
 from app.common.decorators.errors import catch_and_log_errors
 from app.common.decorators.retry import with_retry
 from app.common.utils.logger import setup_logger
-from app.config import CFG
+from app.config import config
 from app.db.repositories.pgvector_repository import get_pgvector_repo
 from app.domain.ingestion.base.ingester_base import IngesterBase
 from app.domain.ingestion.utils.text import chunk_text
@@ -37,17 +37,17 @@ def _safe_metadata(meta: dict, *, max_len: int = 8192) -> dict:
 class PgVectorIngester(IngesterBase):
     """
     Ingests documents into Postgres (pgvector) using sentence-transformers embeddings.
-    Reads config from manifest via CFG.retrieval.* and CFG.memory.collection_name.
+    Reads config from manifest via config.retrieval.* and config.memory.collection_name.
     """
 
     def __init__(self) -> None:
         self.model = get_embedding_model()
-        self.collection = CFG.memory.collection_name
-        self.chunk_size = CFG.retrieval.chunk_size
+        self.collection = config.memory.collection_name
+        self.chunk_size = config.retrieval.chunk_size
 
         # root folder and globs come from manifest
-        self.docs_root = Path(CFG.retrieval.docs_path)
-        self.patterns = list(CFG.retrieval.include_ext)
+        self.docs_root = Path(config.retrieval.docs_path)
+        self.patterns = list(config.retrieval.include_ext)
 
         # ensure data dir exists (not strictly required, but nice to have)
         self.docs_root.mkdir(parents=True, exist_ok=True)

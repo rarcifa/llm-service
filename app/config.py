@@ -3,10 +3,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any
 
 import yaml
 
-from app.registry.prompt_registry import PromptRegistry
+from app.registry.prompt_registry import PromptRecord, PromptRegistry
 
 MANIFEST_PATH = Path("manifest.yaml")
 
@@ -110,6 +111,9 @@ class PromptData:
     name: str
     template: str
     placeholders: tuple[str, ...]
+    id: str | None = None
+    version: str | None = None
+    meta: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -202,17 +206,25 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
     pr = data["prompts"]
     registry_dir = paths.prompt_dir
     registry = PromptRegistry(base_path=str(registry_dir))
-    loaded_prompts = {}
+    loaded_prompts: dict[str, PromptData] = {}
+
     for key in pr["files"]:
-        content = registry.get(key)
+        record: PromptRecord = registry.get(key)  # raises ItemNotFound if missing
         loaded_prompts[key] = PromptData(
-            name=content.get("name", ""),
-            template=content.get("template", ""),
-            placeholders=tuple(content.get("placeholders", [])),
+            name=record.name,
+            template=record.template,
+            placeholders=tuple(record.placeholders),
+            id=record.id,
+            version=record.version,
+            meta=record.meta,
         )
+
     prompts = PromptsCfg(
-        registry_dir=registry_dir, files=tuple(pr["files"]), loaded=loaded_prompts
+        registry_dir=registry_dir,
+        files=tuple(pr["files"]),
+        loaded=loaded_prompts,
     )
+
 
     # tools
     tl = data["tools"]
@@ -273,4 +285,4 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
 
 
 # Export a singleton for convenience
-CFG = load_config()
+config = load_config()

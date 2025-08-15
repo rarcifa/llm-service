@@ -15,7 +15,7 @@ from opentelemetry.trace import get_current_span
 from sentence_transformers import util
 
 from app.common.decorators.errors import catch_and_log_errors
-from app.config import CFG
+from app.config import config
 from app.constants.values import OLLAMA_CLI, OLLAMA_CMD
 from app.domain.retrieval.utils.embeddings_utils import get_embedding_model
 from app.enums.errors.eval import EvalErrorType
@@ -83,8 +83,8 @@ def compute_rating(grounding_score: float, judgment: str) -> str:
     """Map grounding + helpfulness to PASS or FAIL using manifest minimums."""
     score = extract_score_from_judgment(judgment)
 
-    gp = float(CFG.eval.grounding_min)
-    hp = int(CFG.eval.helpfulness_min)
+    gp = float(config.eval.grounding_min)
+    hp = int(config.eval.helpfulness_min)
 
     if grounding_score >= gp and score >= hp:
         return RatingKey.PASS

@@ -3,8 +3,8 @@ from jinja2 import Template
 from app.domain.provider.impl.ollama_provider import Provider
 from app.domain.tools.base.tool_planner_base import ToolPlannerBase
 from app.registry.prompt_registry import PromptRegistry
-from app.config import CFG
-from app.registry.tool_registry import build_tool_cards, load_tools_from_manifest
+from app.config import config
+from app.registry.tool_registry import ToolRegistry
 from app.common.error_handling import error_boundary  # ⬅️ add
 
 logger = logging.getLogger("agent")
@@ -18,20 +18,21 @@ class ToolPlanner(ToolPlannerBase):
 
     def __init__(self, use_llm: bool = True):
         self.use_llm = use_llm
-        self.registry = load_tools_from_manifest()
+        self.registry = ToolRegistry()
         self.provider = Provider() if use_llm else None
 
     def route(self, user_input: str):
         if not self.use_llm:
             return []
 
-        reg = PromptRegistry(base_path=str(CFG.prompts.registry_dir))
-        tmpl = reg.get("agent/planner")["template"]
-        prompt = Template(tmpl).render(
-            input=user_input,
-            tool_cards=build_tool_cards(self.registry),
+        reg = PromptRegistry(base_path=str(config.prompts.registry_dir))
+        prompt = reg.render(
+            "agent/planner",
+            {
+                "input": user_input,
+                "tool_cards": json.dumps(self.registry.cards())
+            },
         )
-
         raw = _safe_run_json(self.provider, prompt, 0.0)
         if raw is None:
             logger.warning("Planner JSON failed → PASS []")

@@ -16,7 +16,7 @@ def _censor(word: str) -> str:
 @lru_cache(maxsize=1)
 def _profanity_regex():
     # Late import to avoid cycles
-    from app.config import CFG
+    from app.config import config
 
     words = tuple(["damn", "hell", "shit","fuck"])
     if not words:

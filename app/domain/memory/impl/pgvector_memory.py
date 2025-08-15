@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 from typing import List
 
 from app.common.decorators.errors import catch_and_log_errors
-from app.config import CFG
+from app.config import config
 from app.db.repositories.pgvector_repository import get_pgvector_repo
 from app.domain.memory.base.memory_base import MemoryBase
 from app.domain.retrieval.utils.embeddings_utils import get_cached_embedding
@@ -26,7 +26,7 @@ class MemoryImpl(MemoryBase):
         emb = get_cached_embedding(text)
         with get_pgvector_repo(distance="cosine") as repo:
             repo.upsert(
-                collection=CFG.memory.collection_name,
+                collection=config.memory.collection_name,
                 embedding=emb,
                 document=text,
                 metadata={
@@ -42,7 +42,7 @@ class MemoryImpl(MemoryBase):
         with get_pgvector_repo(distance="cosine") as repo:
             hits = repo.topk(
                 query_vec=qemb,
-                collection=CFG.memory.collection_name,
+                collection=config.memory.collection_name,
                 k=self.window_size,
             )
         return [h["document"] for h in hits if h.get("document")]

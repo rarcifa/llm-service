@@ -12,7 +12,7 @@ logger = setup_logger()
 @lru_cache(maxsize=1)
 def _compiled_injection_regexes():
     # Late import to avoid cycles
-    from app.config import CFG
+    from app.config import config
 
     patterns: Iterable[str] = [
         r"(?i)\b(ignore|bypass|override)\b.*\b(system|instruction)s?\b",

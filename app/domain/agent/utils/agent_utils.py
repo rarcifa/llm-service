@@ -15,13 +15,14 @@ from typing import Any, Callable, Generator, List
 from jinja2 import Template
 
 from app.common.decorators.errors import catch_and_log_errors
-from app.config import CFG
+from app.config import config
 from app.domain.provider.utils.provider_utils import verify_prompt_variables
 from app.domain.safety.utils.injection_detector import detect_prompt_injection
+from app.domain.safety.utils.pii_filter import redact_pii
+from app.domain.safety.utils.profanity_filter import filter_profanity
 from app.enums.errors.agent import AgentErrorType
 from app.enums.prompts import PromptConfigKey
 from app.enums.tools import ToolKey, ToolName
-from app.registry.guardrail_registry import GUARDRAIL_FUNCTIONS
 
 
 @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_SANITIZE_INPUT})
@@ -29,13 +30,9 @@ def sanitize_io(user_input: str) -> str:
     """Sanitize and normalize user input (PII redaction + profanity filtering)."""
     if detect_prompt_injection(user_input):
         raise ValueError("Prompt injection detected.")
-
-    # Access guardrail tools directly from registry (CFG holds config for patterns/lists)
-    pii_tool = GUARDRAIL_FUNCTIONS[ToolName.PII_REDACTOR][ToolKey.FUNCTION]
-    profanity_tool = GUARDRAIL_FUNCTIONS[ToolName.PROFANITY_FILTER][ToolKey.FUNCTION]
-
-    safe_input = pii_tool(user_input)
-    filtered = profanity_tool(safe_input)
+    
+    safe_input = redact_pii(user_input)
+    filtered = filter_profanity(safe_input)
     return filtered or user_input.strip()
 
 
@@ -43,15 +40,17 @@ def sanitize_io(user_input: str) -> str:
 def render_prompt(filtered_input: str, context_chunks: List[str]) -> str:
     """Render a Jinja2 prompt using input and retrieved context."""
 
-    # In the new config, prompt templates live in CFG.prompts.registry_dir.
+    # In the new config, prompt templates live in config.prompts.registry_dir.
     # You’d typically use PromptRegistry to load them — here assuming you want
     # the QA prompt (agent/qa) and its `name` placeholder.
     from app.registry.prompt_registry import PromptRegistry
 
-    registry = PromptRegistry(base_path=str(CFG.prompts.registry_dir))
-    qa_prompt = registry.get("agent/qa")
-    qa_name = qa_prompt.get("name", "Agent")
-    qa_template = qa_prompt["template"]
+    reg = PromptRegistry(base_path=str(config.prompts.registry_dir))
+    qa_record = reg.get("agent/qa")  # returns PromptRecord
+
+    qa_name = qa_record.name or "Agent"
+    qa_template = qa_record.template  # this is the old qa_prompt["template"]
+
 
     missing = verify_prompt_variables(
         qa_template,

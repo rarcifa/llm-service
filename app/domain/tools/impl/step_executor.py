@@ -1,8 +1,8 @@
 import logging
 from typing import Any, Dict, List
 from app.domain.tools.base.step_executor_base import StepExecutorBase
-from app.registry.tool_registry import load_tools_from_manifest
-from app.common.error_handling import error_boundary  # ⬅️ add
+from app.common.error_handling import error_boundary
+from app.registry.tool_registry import ToolRegistry  # ⬅️ add
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ def _args_valid(schema: Dict[str, Any] | None, args: Dict[str, Any]) -> bool:
 
 class StepExecutorImpl(StepExecutorBase):
     def __init__(self):
-        self.registry = load_tools_from_manifest()
+        self.registry = ToolRegistry()
 
     def execute(self, plan: List[Dict[str, Any]]) -> str:
         result: str = ""
