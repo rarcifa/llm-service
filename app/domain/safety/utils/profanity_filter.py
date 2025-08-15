@@ -18,7 +18,7 @@ def _profanity_regex():
     # Late import to avoid cycles
     from app.config import CFG
 
-    words = tuple(CFG.guardrails.input_profanity_list or ())
+    words = tuple(["damn", "hell", "shit","fuck"])
     if not words:
         # Match nothing
         return re.compile(r"(?!x)x")

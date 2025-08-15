@@ -21,7 +21,7 @@ from app.config import CFG
 from app.db.repositories.session_repository import get_session_repo
 from app.domain.agent.impl.persistence import persist_conversation
 from app.domain.agent.impl.pipeline import Pipeline
-from app.domain.agent.utils.agent_utils import stream_with_capture
+from app.domain.agent.utils.agent_utils import sanitize_io, stream_with_capture
 from app.domain.eval.impl.eval_impl import EvalImpl
 from app.domain.provider.impl.ollama_provider import Provider
 from app.enums.errors.agent import AgentErrorType
@@ -34,42 +34,6 @@ from app.registry.guardrail_registry import GUARDRAIL_FUNCTIONS
 logger = setup_logger()
 setup_tracing()
 tracer = get_tracer(__name__)
-
-
-def _apply_output_filters(text: str) -> str:
-    """
-    Apply manifest-driven output filters.
-
-    Supports:
-      - dict: {"type": "regex", "pattern": "...", "replace": "...", "ignore_case": bool}
-      - dict: {"type": "tool", "name": "<guardrail_name>"}
-      - str:  "<guardrail_name>"
-    """
-    for f in CFG.guardrails.output_filters:
-        # String -> named guardrail tool (future-compatible)
-        if isinstance(f, str):
-            fn = GUARDRAIL_FUNCTIONS[f][ToolKey.FUNCTION]
-            text = fn(text)
-            continue
-
-        # Dict -> typed config
-        if isinstance(f, dict):
-            ftype = f.get("type")
-            if ftype == "regex":
-                pattern = f.get("pattern")
-                if not pattern:
-                    continue
-                repl = f.get("replace", "[REDACTED]")
-                flags = re.IGNORECASE if f.get("ignore_case") else 0
-                text = re.sub(pattern, repl, text, flags=flags)
-            elif ftype == "tool":
-                name = f.get("name")
-                if name:
-                    fn = GUARDRAIL_FUNCTIONS[name][ToolKey.FUNCTION]
-                    text = fn(text)
-            # unknown type -> ignore
-    return text
-
 
 class AgentImpl:
     """Orchestrates streaming agent execution."""
@@ -95,15 +59,13 @@ class AgentImpl:
         response = self.provider.stream(rendered_prompt)
 
         def _on_stream_complete(final_response: str) -> None:
-            # 1) Apply manifest-driven output filters
-            final_response_filtered = _apply_output_filters(final_response)
 
             # 2) Persist conversation
             persist_conversation(
                 session_id=session_id,
                 user_input=user_input,
-                response=final_response_filtered,
-                tokens_used=len(final_response_filtered.split()),
+                response=final_response,
+                tokens_used=len(final_response.split()),
                 metadata={
                     "model_used": CFG.models.main.model_id,  # ensure string id
                     "tools_enabled": [step["tool"] for step in plan] if plan else [],
@@ -117,7 +79,7 @@ class AgentImpl:
                     target=self._background_eval,
                     kwargs={
                         "filtered_input": filtered_input,
-                        JsonKey.RESPONSE: final_response_filtered,
+                        JsonKey.RESPONSE: final_response,
                         "retrieved_docs": context_chunks,
                         JsonKey.RESPONSE_ID: response_id,
                         JsonKey.MESSAGE_ID: message_id,

@@ -25,7 +25,7 @@ from app.registry.guardrail_registry import GUARDRAIL_FUNCTIONS
 
 
 @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_SANITIZE_INPUT})
-def sanitize_input(user_input: str) -> str:
+def sanitize_io(user_input: str) -> str:
     """Sanitize and normalize user input (PII redaction + profanity filtering)."""
     if detect_prompt_injection(user_input):
         raise ValueError("Prompt injection detected.")

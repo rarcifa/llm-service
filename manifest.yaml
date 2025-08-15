@@ -69,25 +69,6 @@ retrieval:
       lists: 100
       probes: 10
 
-guardrails:
-  input_filters:
-    prompt_injection_patterns:
-      - "(ignore|disregard)\\s+previous\\s+instructions"
-      - "(you are|pretend to be)\\s+a\\s+.*"
-      - "(delete|disable|shutdown).*"
-      - "(prompt|system):"
-      - "(simulate|emulate)\\s+.*"
-    profanity_list:
-      - "damn"
-      - "hell"
-      - "shit"
-      - "fuck"
-  output_filters:
-    - type: regex
-      pattern: "(api_key|password|secret)[=:]\\S+"
-      replace: "[SECRET]"
-      ignore_case: true
-
 eval:
   enabled: true
   thresholds:

@@ -57,13 +57,6 @@ class RetrievalCfg:
 
 
 @dataclass(frozen=True)
-class GuardrailsCfg:
-    input_prompt_injection_patterns: tuple[str, ...]
-    input_profanity_list: tuple[str, ...]
-    output_filters: tuple[dict, ...]
-
-
-@dataclass(frozen=True)
 class EvalCfg:
     enabled: bool
     helpfulness_min: int
@@ -135,7 +128,6 @@ class AppCfg:
     models: Models
     memory: MemoryCfg
     retrieval: RetrievalCfg
-    guardrails: GuardrailsCfg
     eval: EvalCfg
     prompts: PromptsCfg
     tools: ToolsCfg
@@ -194,16 +186,6 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
         embeddings_model=ret["embeddings"]["model"],
         embeddings_provider=ret["embeddings"]["provider"],
         embeddings_dim=int(ret["embeddings"].get("dim", 384)),
-    )
-    # guardrails
-    gr = data["guardrails"]
-    input_filters = gr.get("input_filters", {})
-    guardrails = GuardrailsCfg(
-        input_prompt_injection_patterns=tuple(
-            input_filters.get("prompt_injection_patterns", [])
-        ),
-        input_profanity_list=tuple(input_filters.get("profanity_list", [])),
-        output_filters=tuple(gr.get("output_filters", [])),
     )
 
     # eval
@@ -282,7 +264,6 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
         models=models,
         memory=memory,
         retrieval=retrieval,
-        guardrails=guardrails,
         eval=eval_cfg,
         prompts=prompts,
         tools=tools,

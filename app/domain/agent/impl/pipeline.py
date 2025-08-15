@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Tuple
 
 from app.config import CFG
 from app.domain.agent.base.agent_base import AgentBase
-from app.domain.agent.utils.agent_utils import render_prompt, sanitize_input
+from app.domain.agent.utils.agent_utils import render_prompt, sanitize_io
 from app.domain.memory.impl.pgvector_memory import MemoryImpl
 from app.domain.tools.impl.step_executor import StepExecutorImpl
 from app.domain.tools.impl.tool_planner import ToolPlanner
@@ -27,7 +27,7 @@ class Pipeline(AgentBase):
     def build(
         self, user_input: str
     ) -> Tuple[str, str, List[str], List[Dict[str, Any]]]:
-        filtered_input = sanitize_input(user_input)
+        filtered_input = sanitize_io(user_input)
         plan: List[Dict[str, Any]] = self.planner.route(filtered_input)
 
         tool_output = self.step_executor.execute(plan) if plan else None
