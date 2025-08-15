@@ -1,11 +1,9 @@
-"""
-main.py
+"""Module documentation for `main.py`.
 
-Main FastAPI application entry point for the Enterprise Agent API.
-Initializes the database, loads routers, and configures lifecycle hooks.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from fastapi import FastAPI
@@ -22,14 +20,16 @@ app = FastAPI(
 
 @app.on_event("startup")
 def startup_event():
-    """
-    Executes startup tasks when the FastAPI app is initialized.
+    """Summary of `startup_event`.
 
-    - Initializes database connections (e.g., Postgres).
-    - Can be extended to load memory, preload models, etc.
+    Args:
+        (no arguments)
+
+    Returns:
+        Any: Description of return value.
+
     """
     init_db()
 
 
-# Register chat-related routes
 app.include_router(chat_router)

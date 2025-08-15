@@ -1,16 +1,9 @@
-"""
-tracing.py
+"""Module documentation for `app/common/decorators/tracing.py`.
 
-Sets up distributed tracing using OpenTelemetry. Includes configuration for:
-- Console exporter in development
-- OTLP exporter in all environments (e.g., for Phoenix, Grafana Tempo, etc.)
-- Span-level decorators for automatic instrumentation
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-This module is safe to import across all services and ensures trace context
-is preserved across spans.
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 import os
@@ -24,24 +17,17 @@ from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExport
 
 
 def setup_tracing(service_name: str = "enterprise_agent") -> None:
-    """
-    Configures the global OpenTelemetry tracer provider with span processors.
-
-    - In development (`ENV != "prod"`), logs spans to the console.
-    - In all environments, exports spans to a local OTLP collector.
+    """Summary of `setup_tracing`.
 
     Args:
-        service_name (str): Name used for tracing service resource. Defaults to "enterprise_agent".
+        service_name (str): Description of service_name, default='enterprise_agent'.
+
     """
     resource = Resource.create({"service.name": service_name})
     provider = TracerProvider(resource=resource)
     trace.set_tracer_provider(provider)
-
-    # Log to console in non-production environments
     if os.getenv("ENV", "dev") != "prod":
         provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
-
-    # Always export to OTLP for backend tracing
     provider.add_span_processor(
         BatchSpanProcessor(
             OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True)
@@ -50,34 +36,31 @@ def setup_tracing(service_name: str = "enterprise_agent") -> None:
 
 
 def get_tracer(module_name: str = __name__):
-    """
-    Returns an OpenTelemetry tracer for the specified module or context.
+    """Summary of `get_tracer`.
 
     Args:
-        module_name (str): Name of the module (used in trace UI). Defaults to `__name__`.
+        module_name (str): Description of module_name, default=__name__.
 
     Returns:
-        Tracer: An OpenTelemetry tracer instance.
+        Any: Description of return value.
+
     """
     return trace.get_tracer(module_name)
 
 
 def trace_span(name: str):
-    """
-    Decorator that wraps a function in an OpenTelemetry span.
+    """Summary of `trace_span`.
 
     Args:
-        name (str): Name of the span to show in tracing tools.
+        name (str): Description of name.
 
     Returns:
-        Callable: Wrapped function that will trace execution duration and errors.
+        Any: Description of return value.
 
-    Example:
-        @trace_span("generate_response")
-        def generate(...): ...
     """
 
     def decorator(func):
+
         @wraps(func)
         def wrapper(*args, **kwargs):
             tracer = get_tracer()

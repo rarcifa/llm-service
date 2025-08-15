@@ -1,12 +1,23 @@
+"""Module documentation for `app/common/error_handling.py`.
+
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
+
+Generated on 2025-08-15.
+"""
+
 import asyncio
 import functools
 import logging
-from typing import Optional, Type, Any, Callable
-from starlette.exceptions import HTTPException as StarletteHTTPException
+from typing import Any, Callable, Optional, Type
+
 from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
+
 
 class AppError(Exception):
-    """Unified, user-facing application error."""
+    """Summary of `AppError`."""
+
 
 def error_boundary(
     *,
@@ -16,17 +27,36 @@ def error_boundary(
     message: Optional[str] = None,
     log: bool = True,
 ):
-    """Centralized error handling decorator (works for sync & async)."""
+    """Summary of `error_boundary`.
+
+    Args:
+        map_to (Optional[Type[BaseException]]): Description of map_to, default=AppError.
+        default (Any): Description of default, default=None.
+        reraise (bool): Description of reraise, default=True.
+        message (Optional[str]): Description of message, default=None.
+        log (bool): Description of log, default=True.
+
+    Returns:
+        Any: Description of return value.
+
+    Raises:
+        map_to: Condition when this is raised.
+
+    """
+
     def decorator(fn: Callable):
         logger = logging.getLogger(getattr(fn, "__module__", __name__))
-
         if asyncio.iscoroutinefunction(fn):
+
             @functools.wraps(fn)
             async def async_wrapper(*args, **kwargs):
                 try:
                     return await fn(*args, **kwargs)
-                except (asyncio.CancelledError, StarletteHTTPException, RequestValidationError):
-                    # Preserve cancellation and framework HTTP/validation errors
+                except (
+                    asyncio.CancelledError,
+                    StarletteHTTPException,
+                    RequestValidationError,
+                ):
                     raise
                 except Exception as e:
                     if log:
@@ -36,6 +66,7 @@ def error_boundary(
                     if reraise:
                         raise
                     return default
+
             return async_wrapper
 
         @functools.wraps(fn)
@@ -52,7 +83,10 @@ def error_boundary(
                 if reraise:
                     raise
                 return default
+
         return sync_wrapper
+
     return decorator
+
 
 __all__ = ["AppError", "error_boundary"]

@@ -1,5 +1,12 @@
+"""Module documentation for `app/config.py`.
+
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
+
+Generated on 2025-08-15.
+"""
+
 from __future__ import annotations
-# app/config.py
 
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -14,6 +21,8 @@ MANIFEST_PATH = Path("manifest.yaml")
 
 @dataclass(frozen=True)
 class Paths:
+    """Summary of `Paths`."""
+
     data_dir: Path
     logs_dir: Path
     prompt_dir: Path
@@ -23,6 +32,8 @@ class Paths:
 
 @dataclass(frozen=True)
 class ModelCfg:
+    """Summary of `ModelCfg`."""
+
     provider: str
     model_id: str
     temperature: float
@@ -31,6 +42,8 @@ class ModelCfg:
 
 @dataclass(frozen=True)
 class MemoryCfg:
+    """Summary of `MemoryCfg`."""
+
     enabled: bool
     backend: str
     collection_name: str
@@ -41,24 +54,30 @@ class MemoryCfg:
 
 @dataclass(frozen=True)
 class Models:
+    """Summary of `Models`."""
+
     main: ModelCfg
     eval: ModelCfg
 
 
 @dataclass(frozen=True)
 class RetrievalCfg:
+    """Summary of `RetrievalCfg`."""
+
     enabled: bool
-    backend: str  # NEW: "postgres" | "chroma"
+    backend: str
     docs_path: Path
     chunk_size: int
     include_ext: tuple[str, ...]
     embeddings_model: str
     embeddings_provider: str
-    embeddings_dim: int  # NEW
+    embeddings_dim: int
 
 
 @dataclass(frozen=True)
 class EvalCfg:
+    """Summary of `EvalCfg`."""
+
     enabled: bool
     helpfulness_min: int
     grounding_min: int
@@ -67,6 +86,8 @@ class EvalCfg:
 
 @dataclass(frozen=True)
 class LoggingCfg:
+    """Summary of `LoggingCfg`."""
+
     level: str
     format: str
     sinks: tuple[dict, ...]
@@ -74,32 +95,36 @@ class LoggingCfg:
 
 @dataclass(frozen=True)
 class ToolSpec:
+    """Summary of `ToolSpec`."""
+
     name: str
     module: str
-    # Optional: either supply a class (we'll instantiate it), or omit and use a module function.
     class_: str | None = None
-    # Optional: method on the class instance OR function name on the module (defaults to "run").
     entrypoint: str | None = None
-    # Optional routing metadata for planner cards:
     description: str = ""
     when_to_use: str = ""
-    # Optional JSON Schema for args (validated before execution)
-    args_schema: dict = field(default_factory=lambda: {
-        "type": "object",
-        "properties": {"input": {"type": "string"}},
-        "required": [],
-        "additionalProperties": True,
-    })
+    args_schema: dict = field(
+        default_factory=lambda: {
+            "type": "object",
+            "properties": {"input": {"type": "string"}},
+            "required": [],
+            "additionalProperties": True,
+        }
+    )
 
 
 @dataclass(frozen=True)
 class ToolsCfg:
+    """Summary of `ToolsCfg`."""
+
     enabled: bool
     registry: tuple[ToolSpec, ...]
 
 
 @dataclass(frozen=True)
 class PluginSpec:
+    """Summary of `PluginSpec`."""
+
     name: str
     module: str
     class_: str
@@ -108,6 +133,8 @@ class PluginSpec:
 
 @dataclass(frozen=True)
 class PromptData:
+    """Summary of `PromptData`."""
+
     name: str
     template: str
     placeholders: tuple[str, ...]
@@ -118,6 +145,8 @@ class PromptData:
 
 @dataclass(frozen=True)
 class PromptsCfg:
+    """Summary of `PromptsCfg`."""
+
     registry_dir: Path
     files: tuple[str, ...]
     loaded: dict[str, PromptData]
@@ -125,6 +154,8 @@ class PromptsCfg:
 
 @dataclass(frozen=True)
 class AppCfg:
+    """Summary of `AppCfg`."""
+
     name: str
     version: str
     description: str
@@ -140,6 +171,16 @@ class AppCfg:
 
 
 def _as_model(cfg: dict, key: str) -> ModelCfg:
+    """Summary of `_as_model`.
+
+    Args:
+        cfg (dict): Description of cfg.
+        key (str): Description of key.
+
+    Returns:
+        ModelCfg: Description of return value.
+
+    """
     m = cfg["models"][key]
     return ModelCfg(
         provider=m["provider"],
@@ -150,9 +191,16 @@ def _as_model(cfg: dict, key: str) -> ModelCfg:
 
 
 def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
-    data = yaml.safe_load(path.read_text())
+    """Summary of `load_config`.
 
-    # paths
+    Args:
+        path (Path): Description of path, default=MANIFEST_PATH.
+
+    Returns:
+        AppCfg: Description of return value.
+
+    """
+    data = yaml.safe_load(path.read_text())
     p = data["paths"]
     paths = Paths(
         data_dir=Path(p["data_dir"]),
@@ -161,14 +209,7 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
         vector_store_dir=Path(p["vector_store_dir"]),
         feedback_path=Path(p["feedback_path"]),
     )
-
-    # models
-    models = Models(
-        main=_as_model(data, "main"),
-        eval=_as_model(data, "eval"),
-    )
-
-    # memory
+    models = Models(main=_as_model(data, "main"), eval=_as_model(data, "eval"))
     mem = data["memory"]
     memory = MemoryCfg(
         enabled=bool(mem["enabled"]),
@@ -178,8 +219,6 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
         expiry_minutes=int(mem["expiry_minutes"]),
         persistence_dir=paths.vector_store_dir,
     )
-
-    # retrieval
     ret = data["retrieval"]
     retrieval = RetrievalCfg(
         enabled=bool(ret["enabled"]),
@@ -191,8 +230,6 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
         embeddings_provider=ret["embeddings"]["provider"],
         embeddings_dim=int(ret["embeddings"].get("dim", 384)),
     )
-
-    # eval
     ev = data["eval"]
     thresholds = ev["thresholds"]
     eval_cfg = EvalCfg(
@@ -201,15 +238,12 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
         grounding_min=int(thresholds["grounding_min"]),
         evals=tuple(ev["evals"]),
     )
-
-    # prompts
     pr = data["prompts"]
     registry_dir = paths.prompt_dir
     registry = PromptRegistry(base_path=str(registry_dir))
     loaded_prompts: dict[str, PromptData] = {}
-
     for key in pr["files"]:
-        record: PromptRecord = registry.get(key)  # raises ItemNotFound if missing
+        record: PromptRecord = registry.get(key)
         loaded_prompts[key] = PromptData(
             name=record.name,
             template=record.template,
@@ -218,56 +252,50 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
             version=record.version,
             meta=record.meta,
         )
-
     prompts = PromptsCfg(
-        registry_dir=registry_dir,
-        files=tuple(pr["files"]),
-        loaded=loaded_prompts,
+        registry_dir=registry_dir, files=tuple(pr["files"]), loaded=loaded_prompts
     )
-
-
-    # tools
     tl = data["tools"]
     tools = ToolsCfg(
         enabled=bool(tl["enabled"]),
         registry=tuple(
-            ToolSpec(
-                name=t["name"],
-                module=t["module"],
-                class_=t.get("class"),                    # optional
-                entrypoint=t.get("entrypoint", "run"),    # default "run"
-                description=t.get("description", ""),
-                when_to_use=t.get("when_to_use", ""),
-                args_schema=t.get("args_schema", {
-                    "type": "object",
-                    "properties": {"input": {"type": "string"}},
-                    "required": [],
-                    "additionalProperties": True,
-                }),
+            (
+                ToolSpec(
+                    name=t["name"],
+                    module=t["module"],
+                    class_=t.get("class"),
+                    entrypoint=t.get("entrypoint", "run"),
+                    description=t.get("description", ""),
+                    when_to_use=t.get("when_to_use", ""),
+                    args_schema=t.get(
+                        "args_schema",
+                        {
+                            "type": "object",
+                            "properties": {"input": {"type": "string"}},
+                            "required": [],
+                            "additionalProperties": True,
+                        },
+                    ),
+                )
+                for t in tl["registry"]
             )
-            for t in tl["registry"]
         ),
     )
-
-    # plugins
     plugins = tuple(
-        PluginSpec(
-            name=pl["name"],
-            module=pl["module"],
-            class_=pl["class"],
-            enabled=bool(pl["enabled"]),
+        (
+            PluginSpec(
+                name=pl["name"],
+                module=pl["module"],
+                class_=pl["class"],
+                enabled=bool(pl["enabled"]),
+            )
+            for pl in data.get("plugins", [])
         )
-        for pl in data.get("plugins", [])
     )
-    
-    # logging
     lg = data["logging"]
     logging = LoggingCfg(
-        level=lg["level"],
-        format=lg["format"],
-        sinks=tuple(lg["sinks"]),
+        level=lg["level"], format=lg["format"], sinks=tuple(lg["sinks"])
     )
-
     return AppCfg(
         name=data["name"],
         version=data["version"],
@@ -284,5 +312,4 @@ def load_config(path: Path = MANIFEST_PATH) -> AppCfg:
     )
 
 
-# Export a singleton for convenience
 config = load_config()

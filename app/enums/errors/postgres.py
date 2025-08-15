@@ -1,22 +1,15 @@
-"""
-postgres.py
+"""Module documentation for `app/enums/errors/postgres.py`.
 
-Defines standardized error type enums for categorizing postgres failures.
-Used to label and return consistent error codes across agent pipeline components.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from enum import StrEnum
 
 
 class PostgresErrorType(StrEnum):
-    """
-    Enum representing different categories of agent errors.
-
-    Attributes:
-        POSTGRES_INIT_DB: Failure during DB initialization.
-    """
+    """Summary of `PostgresErrorType`."""
 
     POSTGRES_INIT_DB = "[postgres/init_db] error"

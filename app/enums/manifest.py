@@ -1,30 +1,16 @@
-"""
-manifest.py
+"""Module documentation for `app/enums/manifest.py`.
 
-Defines configuration keys used in agent manifest files (e.g., YAML or JSON)
-that describe agent capabilities, components, and thresholds.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-These keys are used to standardize access to structured config blocks across
-evaluation, memory, model selection, and other runtime features.
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from enum import StrEnum
 
 
 class ManifestConfigKey(StrEnum):
-    """
-    Enum for top-level manifest configuration keys.
-
-    Attributes:
-        MODEL: Key for model settings (e.g., model name, provider).
-        EVAL: Key for evaluation settings (e.g., enablement, thresholds).
-        RETRIEVAL: Key for document retrieval settings.
-        MEMORY: Key for memory configuration (e.g., window size, backend).
-        THRESHOLDS: Key for evaluation threshold definitions.
-    """
+    """Summary of `ManifestConfigKey`."""
 
     MODEL = "model"
     EVAL = "eval"

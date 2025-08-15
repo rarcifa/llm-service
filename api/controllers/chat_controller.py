@@ -1,15 +1,9 @@
-"""
-chat_controller.py
+"""Module documentation for `api/controllers/chat_controller.py`.
 
-Defines the ChatController responsible for handling API requests related to
-chat interactions with the LLM agent. Delegates to the ChatService for core logic.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Supports:
-- Synchronous chat (`POST /chat`)
-- Streaming chat (`POST /chat/stream`)
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from fastapi import Request
@@ -21,55 +15,53 @@ from app.services.chat_service import ChatService
 
 
 class ChatController:
-    """
-    Handles incoming FastAPI requests for LLM chat interactions.
-    Validates inputs and delegates processing to ChatService.
+    """Summary of `ChatController`.
 
-    Methods:
-        chat(request): Handles a synchronous chat request and returns a JSON response.
-        stream_chat(request): Handles a streaming chat request and returns a StreamingResponse.
+    Attributes:
+        service: Description of `service`.
     """
 
     def __init__(self, service: ChatService):
-        """
-        Initializes the ChatController with a ChatService instance.
+        """Summary of `__init__`.
 
         Args:
-            service (ChatService): The underlying service handling agent logic.
+            self: Description of self.
+            service (ChatService): Description of service.
+
+        Returns:
+            Any: Description of return value.
+
         """
         self.service = service
 
     async def chat(self, request: Request):
-        """
-        Handles a streaming chat request and returns token-by-token output.
+        """Summary of `chat`.
 
         Args:
-            request (Request): The FastAPI request containing user input.
+            self: Description of self.
+            request (Request): Description of request.
 
         Returns:
-            StreamingResponse: A stream of agent output as plain text.
+            Any: Description of return value.
+
         """
         try:
             body = ChatRequest(**await request.json())
             user_input = getattr(body, RequestKey.INPUT)
             session_id = getattr(body, RequestKey.SESSION_ID)
-
             if not user_input:
                 return JSONResponse(
                     {ResponseKey.ERROR: f"Missing '{RequestKey.INPUT}' field"},
                     status_code=HTTPStatusCode.BAD_REQUEST,
                 )
-
             stream = self.service.chat(user_input, session_id)
             return StreamingResponse(
                 stream, media_type="text/plain", status_code=HTTPStatusCode.OK
             )
-
         except ValueError as ve:
             return JSONResponse(
                 {ResponseKey.ERROR: str(ve)}, status_code=HTTPStatusCode.BAD_REQUEST
             )
-
         except Exception as e:
             return JSONResponse(
                 {ResponseKey.ERROR: "Internal server error"},

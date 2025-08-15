@@ -1,12 +1,12 @@
-"""Concrete evaluation service implementation.
+"""Module documentation for `app/domain/eval/impl/eval_impl.py`.
 
-Reads config, computes scores via utils, and emits tracing metadata.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 import datetime
 import uuid
@@ -23,7 +23,7 @@ logger = setup_logger()
 
 
 class EvalImpl(EvalBase):
-    """Service responsible for evaluating agent responses."""
+    """Summary of `EvalImpl`."""
 
     @trace_span(EvalKey.AGENT)
     def run(
@@ -42,11 +42,29 @@ class EvalImpl(EvalBase):
         raw_input: str | None = None,
         conversation_history: list[str] | None = None,
     ) -> dict[str, Any]:
-        """Evaluate an agent response using embedding + judge signals and trace results."""
+        """Summary of `run`.
+
+        Args:
+            self: Description of self.
+            filtered_input (str): Description of filtered_input.
+            response (str): Description of response.
+            retrieved_docs (list[str]): Description of retrieved_docs.
+            response_id (str): Description of response_id.
+            message_id (str): Description of message_id.
+            session_id (str): Description of session_id.
+            prompt_version (str | None): Description of prompt_version, default=None.
+            template_name (str | None): Description of template_name, default=None.
+            system_prompt (str | None): Description of system_prompt, default=None.
+            rendered_prompt (str | None): Description of rendered_prompt, default=None.
+            raw_input (str | None): Description of raw_input, default=None.
+            conversation_history (list[str] | None): Description of conversation_history, default=None.
+
+        Returns:
+            dict[str, Any]: Description of return value.
+
+        """
         trace_id = str(uuid.uuid4())
         timestamp = datetime.datetime.utcnow().isoformat()
-
-        # Compute scores with config injected (no utils->config imports)
         scores = compute_scores(
             filtered_input=filtered_input,
             response=response,
@@ -54,7 +72,6 @@ class EvalImpl(EvalBase):
             conversation_history=conversation_history,
             helpfulness_template=config.prompts.loaded["eval/helpfulness"].template,
         )
-
         meta = {
             TraceMetaKey.TRACE_ID: trace_id,
             TraceMetaKey.TRACE_TIMESTAMP: timestamp,
@@ -77,13 +94,14 @@ class EvalImpl(EvalBase):
             TraceMetaKey.OUTPUT_RESPONSE: response,
             TraceMetaKey.OUTPUT_RESPONSE_LENGTH: len(response),
         }
-
         retrieval = scores.pop("retrieval", {})
         retrieval_trace_attrs = {}
         if "docs" in retrieval:
-            retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_DOCS_COUNT] = len(retrieval["docs"])  # type: ignore[arg-type]
-            if retrieval["docs"]:  # type: ignore[index]
-                top_doc = retrieval["docs"][0]  # type: ignore[index]
+            retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_DOCS_COUNT] = len(
+                retrieval["docs"]
+            )
+            if retrieval["docs"]:
+                top_doc = retrieval["docs"][0]
                 retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_TOP_CHUNK] = top_doc.get(
                     "chunk", ""
                 )[:100]
@@ -93,6 +111,5 @@ class EvalImpl(EvalBase):
                 retrieval_trace_attrs[TraceMetaKey.RETRIEVAL_TOP_SOURCE] = top_doc.get(
                     "source"
                 )
-
         trace_eval_span(meta, {**scores, **retrieval_trace_attrs})
         return {**scores, "retrieval": retrieval}

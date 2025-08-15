@@ -1,14 +1,9 @@
-"""
-file_utils.py
+"""Module documentation for `app/common/utils/files.py`.
 
-Provides a utility function to recursively search for files in a given directory
-that match a list of file extensions. Useful for document ingestion, media scanning,
-or project cleanup tools.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Includes error handling and structured logging.
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 import os
@@ -23,22 +18,19 @@ logger = setup_logger()
 
 @catch_and_log_errors(default_return=[])
 def find_files_by_extension(directory: str, extensions: List[str]) -> List[str]:
-    """
-    Recursively finds files in a directory that match given file extensions.
+    """Summary of `find_files_by_extension`.
 
     Args:
-        directory (str): The root directory to search within.
-        extensions (List[str]): A list of file patterns (e.g., ["*.txt", "*.md"]).
+        directory (str): Description of directory.
+        extensions (List[str]): Description of extensions.
 
     Returns:
-        List[str]: A list of matching file paths as strings.
-                   Returns an empty list on failure.
+        List[str]: Description of return value.
+
     """
     files = []
     for ext in extensions:
-        # rglob supports recursive glob pattern matching like "*.txt"
         files.extend(Path(directory).rglob(ext))
-
     logger.info(
         "Found files", directory=directory, count=len(files), extensions=extensions
     )

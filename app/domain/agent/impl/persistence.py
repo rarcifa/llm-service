@@ -1,6 +1,12 @@
-"""Persistence helpers for agent conversations (impl layer)."""
-from __future__ import annotations
+"""Module documentation for `app/domain/agent/impl/persistence.py`.
 
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
+
+Generated on 2025-08-15.
+"""
+
+from __future__ import annotations
 
 import hashlib
 import uuid
@@ -14,6 +20,15 @@ from app.enums.prompts import RoleKey
 
 
 def _sha256(s: str) -> str:
+    """Summary of `_sha256`.
+
+    Args:
+        s (str): Description of s.
+
+    Returns:
+        str: Description of return value.
+
+    """
     return hashlib.sha256(s.encode("utf-8")).hexdigest()
 
 
@@ -25,8 +40,16 @@ def persist_conversation(
     tokens_used: Optional[int] = None,
     metadata: Optional[dict] = None,
 ) -> None:
-    """Persist the user/agent conversation to Postgres (relational + pgvector)."""
-    # 1) Relational history
+    """Summary of `persist_conversation`.
+
+    Args:
+        session_id (str): Description of session_id.
+        user_input (str): Description of user_input.
+        response (str): Description of response.
+        tokens_used (Optional[int]): Description of tokens_used, default=None.
+        metadata (Optional[dict]): Description of metadata, default=None.
+
+    """
     with get_session_repo() as repo:
         repo.get_or_create_session(session_id)
         repo.store_message(
@@ -45,8 +68,6 @@ def persist_conversation(
             tokens_used=tokens_used,
             metadata=metadata,
         )
-
-    # 2) Vector index (pgvector)
     emb = get_cached_embedding(response)
     with get_pgvector_repo(distance="cosine") as vrepo:
         vrepo.upsert(

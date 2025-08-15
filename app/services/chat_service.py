@@ -1,32 +1,46 @@
+"""Module documentation for `app/services/chat_service.py`.
+
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
+
+Generated on 2025-08-15.
+"""
+
 from app.domain.agent.impl.agent_impl import AgentImpl
 
 
 class ChatService:
-    """
-    Thin service layer that wraps the core agent runner.
-    Provides both standard and streaming interfaces for use in API or CLI.
+    """Summary of `ChatService`.
 
-    Methods:
-        chat(user_input, session_id): Synchronously get agent response.
-        stream_chat(user_input, session_id): Get streaming response from agent.
+    Attributes:
+        agent_impl: Description of `agent_impl`.
     """
 
     def __init__(self):
+        """Summary of `__init__`.
+
+        Args:
+            self: Description of self.
+
+        Returns:
+            Any: Description of return value.
+
+        """
         self.agent_impl = AgentImpl()
 
     def chat(self, user_input: str, session_id: str = None):
-        """
-        Streams the agent's response for real-time interfaces.
+        """Summary of `chat`.
 
         Args:
-            user_input (str): The user's input.
-            session_id (str, optional): The session ID to use.
+            self: Description of self.
+            user_input (str): Description of user_input.
+            session_id (str): Description of session_id, default=None.
 
         Returns:
-            Generator[str]: Streamed output from the model.
+            Any: Description of return value.
+
         """
         return self.agent_impl.run(user_input, session_id)
 
 
-# Singleton instance
 chat_service = ChatService()

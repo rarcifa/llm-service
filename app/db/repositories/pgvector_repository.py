@@ -1,5 +1,14 @@
+"""Module documentation for `app/db/repositories/pgvector_repository.py`.
+
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
+
+Generated on 2025-08-15.
+"""
+
 from __future__ import annotations
 
+from contextlib import contextmanager
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
@@ -13,11 +22,25 @@ from app.db.postgres import SessionLocal
 
 
 class PgVectorRepository:
-    def __init__(self, db: Session, *, distance: str = "cosine") -> None:
-        self.db = db
-        self._distance = distance  # "cosine" | "l2" | "ip"
+    """Summary of `PgVectorRepository`.
 
-    # --- writes ---
+    Attributes:
+        _distance: Description of `_distance`.
+        db: Description of `db`.
+    """
+
+    def __init__(self, db: Session, *, distance: str = "cosine") -> None:
+        """Summary of `__init__`.
+
+        Args:
+            self: Description of self.
+            db (Session): Description of db.
+            distance (str): Description of distance, default='cosine'.
+
+        """
+        self.db = db
+        self._distance = distance
+
     def upsert(
         self,
         *,
@@ -29,6 +52,22 @@ class PgVectorRepository:
         session_id: Optional[UUID] = None,
         id: Optional[UUID] = None,
     ) -> UUID:
+        """Summary of `upsert`.
+
+        Args:
+            self: Description of self.
+            collection (str): Description of collection.
+            embedding (list[float]): Description of embedding.
+            document (Optional[str]): Description of document.
+            metadata (Optional[Dict[str, Any]]): Description of metadata.
+            content_sha256 (str): Description of content_sha256.
+            session_id (Optional[UUID]): Description of session_id, default=None.
+            id (Optional[UUID]): Description of id, default=None.
+
+        Returns:
+            UUID: Description of return value.
+
+        """
         rec_id = id or uuid4()
         stmt = (
             insert(VectorRecordModel)
@@ -54,36 +93,36 @@ class PgVectorRepository:
         self.db.commit()
         return rec_id
 
-    # --- reads ---
     def topk(
         self, *, query_vec: list[float], collection: str, k: int = 5
     ) -> List[Dict[str, Any]]:
+        """Summary of `topk`.
+
+        Args:
+            self: Description of self.
+            query_vec (list[float]): Description of query_vec.
+            collection (str): Description of collection.
+            k (int): Description of k, default=5.
+
+        Returns:
+            List[Dict[str, Any]]: Description of return value.
+
+        """
         if self._distance == "cosine":
-            op = "<=>"  # cosine distance
-            score_sql = "1 - (embedding <=> :q)"  # cosine similarity
+            op = "<=>"
+            score_sql = "1 - (embedding <=> :q)"
         elif self._distance == "l2":
             op = "<->"
-            score_sql = "-(embedding <-> :q)"  # convert distance to similarity
-        else:  # "ip"
+            score_sql = "-(embedding <-> :q)"
+        else:
             op = "<#>"
             score_sql = "-(embedding <#> :q)"
-
         rows = (
             self.db.execute(
                 text(
-                    f"""
-                SELECT id::text, document, metadata, ({score_sql})::float AS score
-                FROM vector_records
-                WHERE collection = :col
-                ORDER BY embedding {op} :q
-                LIMIT :k
-            """
+                    f"\n                SELECT id::text, document, metadata, ({score_sql})::float AS score\n                FROM vector_records\n                WHERE collection = :col\n                ORDER BY embedding {op} :q\n                LIMIT :k\n            "
                 ),
-                {
-                    "q": Vector(query_vec),  # <-- key change: adapt to pgvector
-                    "col": collection,
-                    "k": k,
-                },
+                {"q": Vector(query_vec), "col": collection, "k": k},
             )
             .mappings()
             .all()
@@ -91,11 +130,17 @@ class PgVectorRepository:
         return [dict(r) for r in rows]
 
 
-from contextlib import contextmanager
-
-
 @contextmanager
 def get_pgvector_repo(distance: str = "cosine"):
+    """Summary of `get_pgvector_repo`.
+
+    Args:
+        distance (str): Description of distance, default='cosine'.
+
+    Returns:
+        Any: Description of return value.
+
+    """
     db = SessionLocal()
     try:
         yield PgVectorRepository(db, distance=distance)

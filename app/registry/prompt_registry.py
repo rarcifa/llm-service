@@ -1,19 +1,13 @@
-"""
-prompt_registry.py
+"""Module documentation for `app/registry/prompt_registry.py`.
 
-Loads, caches, and renders YAML-based prompt templates. Files include:
-id, version, placeholders, template (Jinja2), and optional metadata.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Typical usage:
-    registry = PromptRegistry(base_path="prompts")
-    raw = registry.get("agent/qa")              # dict with id, version, template
-    rendered = registry.render("agent/qa", {"name": "Alice", "input": "Hello"})
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from __future__ import annotations
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Optional
@@ -24,11 +18,11 @@ from jinja2 import Template
 from app.registry.base_registry import BaseRegistry, RegistryError
 
 
-
 @dataclass(frozen=True)
 class PromptRecord:
-    """Parsed prompt file."""
-    name: str                     # logical path (e.g., 'agent/qa')
+    """Summary of `PromptRecord`."""
+
+    name: str
     id: str
     version: str
     template: str
@@ -37,28 +31,35 @@ class PromptRecord:
 
 
 class PromptRegistry(BaseRegistry[PromptRecord]):
-    """
-    Manages access to structured YAML prompt templates.
+    """Summary of `PromptRegistry`.
 
     Attributes:
-        base_path (Path): Root directory containing prompt YAML files.
-        cache (dict[str, PromptRecord]): In-memory cache of prompts.
+        base_path: Description of `base_path`.
     """
 
     def __init__(self, base_path: str = "prompts") -> None:
+        """Summary of `__init__`.
+
+        Args:
+            self: Description of self.
+            base_path (str): Description of base_path, default='prompts'.
+
+        """
         self.base_path = Path(base_path)
         super().__init__()
 
-    # --- Base hooks -------------------------------------------------------------
-
     def _load_all(self) -> None:
-        """
-        Walk `base_path` for *.yaml files and load them into the cache.
-        Names are relative paths without extension (e.g., 'agent/qa').
+        """Summary of `_load_all`.
+
+        Args:
+            self: Description of self.
+
+        Raises:
+            RegistryError: Condition when this is raised.
+
         """
         if not self.base_path.exists():
             raise RegistryError(f"Prompt path does not exist: {self.base_path}")
-
         for yml in self.base_path.rglob("*.yaml"):
             name = yml.relative_to(self.base_path).with_suffix("").as_posix()
             with yml.open("r", encoding="utf-8") as f:
@@ -69,12 +70,25 @@ class PromptRegistry(BaseRegistry[PromptRecord]):
                 version=str(data.get("version", "0")),
                 template=str(data.get("template", "")),
                 placeholders=list(data.get("placeholders", [])),
-                meta={k: v for k, v in data.items() if k not in {"id", "version", "template", "placeholders"}},
+                meta={
+                    k: v
+                    for k, v in data.items()
+                    if k not in {"id", "version", "template", "placeholders"}
+                },
             )
             self.cache[name] = record
 
     def _card(self, item: PromptRecord) -> dict:
-        """Metadata card for UIs and diagnostics."""
+        """Summary of `_card`.
+
+        Args:
+            self: Description of self.
+            item (PromptRecord): Description of item.
+
+        Returns:
+            dict: Description of return value.
+
+        """
         return {
             "name": item.name,
             "id": item.id,
@@ -83,22 +97,20 @@ class PromptRegistry(BaseRegistry[PromptRecord]):
             **({"meta": item.meta} if item.meta else {}),
         }
 
-    # --- Prompt-specific API ----------------------------------------------------
-
     def render(self, name: str, variables: Dict[str, Any]) -> str:
-        """
-        Render a prompt using Jinja2 with the given variables.
+        """Summary of `render`.
 
         Args:
-            name: Prompt name (e.g., 'agent/qa').
-            variables: Dict of variables for the template.
+            self: Description of self.
+            name (str): Description of name.
+            variables (Dict[str, Any]): Description of variables.
 
         Returns:
-            The rendered prompt string.
+            str: Description of return value.
 
         Raises:
-            ItemNotFound: If the prompt is not found.
-            ValueError: If required placeholders are missing.
+            ValueError: Condition when this is raised.
+
         """
         record = self.get(name)
         missing = [k for k in record.placeholders if k not in variables]

@@ -1,13 +1,9 @@
-"""
-session_repository.py
+"""Module documentation for `app/db/repositories/session_repository.py`.
 
-Handles database interactions for storing and retrieving chat sessions and messages.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-This repository provides a persistent backing for session continuity,
-message history, and logging of user-agent conversations.
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from contextlib import contextmanager
@@ -25,14 +21,22 @@ from app.enums.errors.session_repository import SessionRepoErrorType
 
 
 class SessionRepository:
-    """
-    Repository for managing chat sessions and messages.
-    This class assumes that a DB session is injected externally (e.g. via FastAPI's Depends).
+    """Summary of `SessionRepository`.
+
+    Attributes:
+        db: Description of `db`.
     """
 
     def __init__(self, db: Session):
-        """
-        Initializes a new database session.
+        """Summary of `__init__`.
+
+        Args:
+            self: Description of self.
+            db (Session): Description of db.
+
+        Returns:
+            Any: Description of return value.
+
         """
         self.db = db
 
@@ -40,14 +44,15 @@ class SessionRepository:
         default_return={"error": SessionRepoErrorType.SESSION_REPO_GET_SESSION_BY_ID}
     )
     def get_session_by_id(self, session_id: UUID) -> Optional[SessionModel]:
-        """
-        Retrieve a session by its unique ID.
+        """Summary of `get_session_by_id`.
 
         Args:
-            session_id (UUID): The unique identifier of the session.
+            self: Description of self.
+            session_id (UUID): Description of session_id.
 
         Returns:
-            Optional[SessionModel]: The session object if found, otherwise None.
+            Optional[SessionModel]: Description of return value.
+
         """
         return self.db.query(SessionModel).filter_by(id=session_id).first()
 
@@ -57,15 +62,16 @@ class SessionRepository:
     def create_session(
         self, session_id: Optional[UUID] = None, metadata: Optional[dict] = None
     ) -> SessionModel:
-        """
-        Create a new session with optional metadata.
+        """Summary of `create_session`.
 
         Args:
-            session_id (Optional[UUID]): A predefined UUID for the session (auto-generated if None).
-            metadata (Optional[dict]): Optional session metadata for traceability or context.
+            self: Description of self.
+            session_id (Optional[UUID]): Description of session_id, default=None.
+            metadata (Optional[dict]): Description of metadata, default=None.
 
         Returns:
-            SessionModel: The newly created session object.
+            SessionModel: Description of return value.
+
         """
         session = SessionModel(id=session_id, metadata=metadata)
         self.db.add(session)
@@ -77,14 +83,15 @@ class SessionRepository:
         default_return={"error": SessionRepoErrorType.SESSION_REPO_CREATE_SESSION}
     )
     def get_or_create_session(self, session_id: UUID) -> SessionModel:
-        """
-        Retrieves an existing session or creates a new one if it doesn't exist.
+        """Summary of `get_or_create_session`.
 
         Args:
-            session_id (str): The UUID for the session.
+            self: Description of self.
+            session_id (UUID): Description of session_id.
 
         Returns:
-            Session: SQLAlchemy session object.
+            SessionModel: Description of return value.
+
         """
         session = self.get_session_by_id(session_id)
         if session:
@@ -104,14 +111,21 @@ class SessionRepository:
         feedback: Optional[dict] = None,
         metadata: Optional[dict] = None,
     ) -> MessageModel:
-        """
-        Stores a message associated with a session.
+        """Summary of `store_message`.
 
         Args:
-            session_id (str): The session ID the message belongs to.
-            message_id (str): Unique identifier for the message.
-            role (str): The sender's role ('user' or 'agent').
-            content (str): The content of the message.
+            self: Description of self.
+            session_id (UUID): Description of session_id.
+            role (str): Description of role.
+            content (str): Description of content.
+            message_id (Optional[UUID]): Description of message_id, default=None.
+            tokens_used (Optional[int]): Description of tokens_used, default=None.
+            feedback (Optional[dict]): Description of feedback, default=None.
+            metadata (Optional[dict]): Description of metadata, default=None.
+
+        Returns:
+            MessageModel: Description of return value.
+
         """
         message = MessageModel(
             id=message_id,
@@ -132,14 +146,15 @@ class SessionRepository:
         default_return={"error": SessionRepoErrorType.SESSION_REPO_GET_MESSAGES}
     )
     def get_messages_for_session(self, session_id: UUID) -> List[MessageModel]:
-        """
-        Retrieves the full message history for a session, ordered by timestamp.
+        """Summary of `get_messages_for_session`.
 
         Args:
-            session_id (str): The session ID to retrieve messages for.
+            self: Description of self.
+            session_id (UUID): Description of session_id.
 
         Returns:
-            list[str]: List of formatted messages in the form "User: ...", "Agent: ..."
+            List[MessageModel]: Description of return value.
+
         """
         return (
             self.db.query(MessageModel)
@@ -151,9 +166,14 @@ class SessionRepository:
 
 @contextmanager
 def get_session_repo():
-    """
-    Yields a SessionRepository instance with automatic DB session management.
-    Use this in non-FastAPI contexts (agents, jobs, etc.).
+    """Summary of `get_session_repo`.
+
+    Args:
+        (no arguments)
+
+    Returns:
+        Any: Description of return value.
+
     """
     db = SessionLocal()
     try:

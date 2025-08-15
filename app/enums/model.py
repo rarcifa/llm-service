@@ -1,24 +1,15 @@
-"""
-model.py
+"""Module documentation for `app/enums/model.py`.
 
-Defines configuration keys related to model setup and selection,
-used in agent manifests and runtime configuration.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-This enum allows standardized access to model parameters across services.
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from enum import StrEnum
 
 
 class ModelConfigKey(StrEnum):
-    """
-    Enum for model-specific configuration keys.
-
-    Attributes:
-        MODEL_ID: The identifier or name of the model to use (e.g., "mistral", "gpt-4").
-    """
+    """Summary of `ModelConfigKey`."""
 
     MODEL_ID = "model_id"

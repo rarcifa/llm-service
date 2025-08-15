@@ -1,14 +1,9 @@
-"""
-error_handling.py
+"""Module documentation for `app/common/decorators/errors.py`.
 
-Defines a reusable decorator `catch_and_log_errors` that wraps a function to
-safely catch exceptions, log them with traceback, and return a fallback value.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Used to harden functions against unexpected runtime errors, particularly in
-non-critical paths like analytics, monitoring, or optional computations.
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 import functools
@@ -20,23 +15,18 @@ logger = setup_logger()
 
 
 def catch_and_log_errors(default_return=None):
-    """
-    Decorator that catches any unhandled exceptions in a function, logs the error,
-    and safely returns a fallback value instead of raising the exception.
+    """Summary of `catch_and_log_errors`.
 
     Args:
-        default_return (Any, optional): The value to return if an exception occurs.
-            Defaults to None.
+        default_return: Description of default_return, default=None.
 
     Returns:
-        Callable: Wrapped function with exception handling.
+        Any: Description of return value.
 
-    Example:
-        @catch_and_log_errors(default_return=[])
-        def load_data(): ...
     """
 
     def decorator(func):
+
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             try:

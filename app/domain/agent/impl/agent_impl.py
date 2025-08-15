@@ -1,13 +1,12 @@
-"""Streaming agent implementation.
+"""Module documentation for `app/domain/agent/impl/agent_impl.py`.
 
-Runs the LLM agent in streaming mode, returning tokens incrementally while
-persisting results and (optionally) launching background evaluation.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 import re
 import threading
@@ -29,16 +28,27 @@ from app.enums.eval import EvalResultKey, RetrievalDocKey
 from app.enums.prompts import JsonKey
 from app.enums.tools import ToolKey
 
-# Setup instrumentation
 logger = setup_logger()
 setup_tracing()
 tracer = get_tracer(__name__)
 
+
 class AgentImpl:
-    """Orchestrates streaming agent execution."""
+    """Summary of `AgentImpl`.
+
+    Attributes:
+        eval: Description of `eval`.
+        pipeline: Description of `pipeline`.
+        provider: Description of `provider`.
+    """
 
     def __init__(self) -> None:
-        """Initialize evaluation, provider, and pipeline."""
+        """Summary of `__init__`.
+
+        Args:
+            self: Description of self.
+
+        """
         self.eval = EvalImpl()
         self.provider = Provider()
         self.pipeline = Pipeline()
@@ -47,32 +57,37 @@ class AgentImpl:
     def run(
         self, user_input: str, session_id: str | None = None
     ) -> Generator[str, None, None]:
-        """Stream a model response while capturing full output."""
+        """Summary of `run`.
+
+        Args:
+            self: Description of self.
+            user_input (str): Description of user_input.
+            session_id (str | None): Description of session_id, default=None.
+
+        Returns:
+            Generator[str, None, None]: Description of return value.
+
+        """
         response_id = str(uuid.uuid4())
         message_id = str(uuid.uuid4())
         session_id = session_id or str(uuid.uuid4())
-
         filtered_input, rendered_prompt, context_chunks, plan = self.pipeline.build(
             user_input
         )
         response = self.provider.stream(rendered_prompt)
 
         def _on_stream_complete(final_response: str) -> None:
-
-            # 2) Persist conversation
             persist_conversation(
                 session_id=session_id,
                 user_input=user_input,
                 response=final_response,
                 tokens_used=len(final_response.split()),
                 metadata={
-                    "model_used": config.models.main.model_id,  # ensure string id
+                    "model_used": config.models.main.model_id,
                     "tools_enabled": [step["tool"] for step in plan] if plan else [],
                     "eval_enabled": config.eval.enabled,
                 },
             )
-
-            # 3) Optional background evaluation
             if config.eval.enabled:
                 threading.Thread(
                     target=self._background_eval,
@@ -92,12 +107,16 @@ class AgentImpl:
         return stream_with_capture(response, on_complete=_on_stream_complete)
 
     def _background_eval(self, **kwargs) -> None:
-        """Run evaluation asynchronously after response completion."""
+        """Summary of `_background_eval`.
+
+        Args:
+            self: Description of self.
+            kwargs: Description of kwargs.
+
+        """
         with get_session_repo() as repo:
             history = repo.get_messages_for_session(kwargs[JsonKey.SESSION_ID])
-
         result = self.eval.run(**kwargs, conversation_history=history)
-
         if result:
             docs = result.get("retrieval", {}).get("docs") or []
             top_doc = docs[0] if docs else {}

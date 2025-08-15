@@ -1,19 +1,13 @@
-"""
-tool_registry.py
+"""Module documentation for `app/registry/tool_registry.py`.
 
-Loads and caches tools declared in configuration. Each tool resolves to a
-callable (module function or class method) and exposes metadata.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Typical usage:
-    registry = ToolRegistry()
-    search = registry.get("search")       # LoadedTool
-    result = registry.execute("search", query="AI agents")
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from __future__ import annotations
+
 import importlib
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Optional
@@ -24,7 +18,8 @@ from app.registry.base_registry import BaseRegistry, RegistryError
 
 @dataclass(frozen=True)
 class LoadedTool:
-    """Resolved tool with metadata and a callable handler."""
+    """Summary of `LoadedTool`."""
+
     name: str
     description: str
     when_to_use: str
@@ -33,25 +28,26 @@ class LoadedTool:
 
 
 class ToolRegistry(BaseRegistry[LoadedTool]):
-    """
-    Manages access to callable tools declared in configuration.
-
-    Attributes:
-        cache (dict[str, LoadedTool]): In-memory cache of tools keyed by name.
-    """
-
-    # --- Base hooks -------------------------------------------------------------
+    """Summary of `ToolRegistry`."""
 
     def _load_all(self) -> None:
-        """Load all enabled tools from configuration into the cache."""
+        """Summary of `_load_all`.
+
+        Args:
+            self: Description of self.
+
+        """
         tools_cfg = getattr(config, "tools", None)
         if not tools_cfg or not getattr(tools_cfg, "enabled", False):
             self.cache.clear()
             return
-
         reg = getattr(tools_cfg, "registry", [])
         for t in reg:
-            handler = self._resolve_callable(t.module, getattr(t, "class_", None), getattr(t, "entrypoint", None) or "run")
+            handler = self._resolve_callable(
+                t.module,
+                getattr(t, "class_", None),
+                getattr(t, "entrypoint", None) or "run",
+            )
             self.cache[t.name] = LoadedTool(
                 name=t.name,
                 description=t.description,
@@ -60,22 +56,49 @@ class ToolRegistry(BaseRegistry[LoadedTool]):
                 handler=handler,
             )
 
-    def _resolve_callable(self, module: str, class_: Optional[str], entrypoint: str) -> Callable[..., Any]:
-        """Dynamically import and resolve the callable for a tool."""
+    def _resolve_callable(
+        self, module: str, class_: Optional[str], entrypoint: str
+    ) -> Callable[..., Any]:
+        """Summary of `_resolve_callable`.
+
+        Args:
+            self: Description of self.
+            module (str): Description of module.
+            class_ (Optional[str]): Description of class_.
+            entrypoint (str): Description of entrypoint.
+
+        Returns:
+            Callable[..., Any]: Description of return value.
+
+        Raises:
+            RegistryError: Condition when this is raised.
+
+        """
         mod = importlib.import_module(module)
         if class_:
             cls = getattr(mod, class_)
-            instance = cls()  # extend for DI as needed
-            fn = getattr(instance, entrypoint, None) or getattr(instance, "__call__", None)
+            instance = cls()
+            fn = getattr(instance, entrypoint, None) or getattr(
+                instance, "__call__", None
+            )
         else:
             fn = getattr(mod, entrypoint, None)
         if not callable(fn):
-            qual = f"{module}.{class_+'.' if class_ else ''}{entrypoint}"
+            qual = f"{module}.{(class_ + '.' if class_ else '')}{entrypoint}"
             raise RegistryError(f"{qual} is not callable")
         return fn
 
     def _card(self, item: LoadedTool) -> dict:
-        """Metadata card for UIs and diagnostics."""
+        """Summary of `_card`.
+
+        Args:
+            self: Description of self.
+            item (LoadedTool): Description of item.
+
+        Returns:
+            dict: Description of return value.
+
+        """
         return {
             "name": item.name,
             "description": item.description,
@@ -83,21 +106,17 @@ class ToolRegistry(BaseRegistry[LoadedTool]):
             "args_schema": item.args_schema,
         }
 
-    # --- Tool-specific API ------------------------------------------------------
-
     def execute(self, name: str, /, **kwargs) -> Any:
-        """
-        Execute a tool by name with the provided keyword arguments.
+        """Summary of `execute`.
 
         Args:
-            name: Tool name.
-            **kwargs: Arguments to pass to the tool handler.
+            self: Description of self.
+            name (str): Description of name.
+            kwargs: Description of kwargs.
 
         Returns:
-            Any: Result from the tool handler.
+            Any: Description of return value.
 
-        Raises:
-            ItemNotFound: If the tool is not found.
         """
         tool = self.get(name)
         return tool.handler(**kwargs)

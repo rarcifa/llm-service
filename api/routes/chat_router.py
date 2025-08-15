@@ -1,11 +1,9 @@
-"""
-chat_router.py
+"""Module documentation for `api/routes/chat_router.py`.
 
-Defines the FastAPI router for chat interactions with the LLM agent.
-Includes synchronous and streaming endpoints for interacting with the model.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from fastapi import APIRouter, Depends, Request
@@ -17,12 +15,14 @@ router = APIRouter(prefix="/chat", tags=["Chat"])
 
 
 def get_chat_controller():
-    """
-    Dependency provider for ChatController instance.
-    Returns a new ChatController using the ChatService.
+    """Summary of `get_chat_controller`.
+
+    Args:
+        (no arguments)
 
     Returns:
-        ChatController: Controller instance for handling chat requests.
+        Any: Description of return value.
+
     """
     return ChatController(ChatService())
 
@@ -31,17 +31,14 @@ def get_chat_controller():
 async def chat_route(
     request: Request, controller: ChatController = Depends(get_chat_controller)
 ):
-    """
-    POST /chat/stream
-
-    Handles a streaming chat request, returning token-by-token output.
-    Accepts a JSON payload with `input` and optional `session_id`.
+    """Summary of `chat_route`.
 
     Args:
-        request (Request): The FastAPI request with user input.
-        controller (ChatController): Dependency-injected controller.
+        request (Request): Description of request.
+        controller (ChatController): Description of controller, default=Depends(get_chat_controller).
 
     Returns:
-        StreamingResponse: A stream of agent response tokens as plain text.
+        Any: Description of return value.
+
     """
     return await controller.chat(request)

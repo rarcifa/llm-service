@@ -1,14 +1,9 @@
-"""
-retry.py
+"""Module documentation for `app/common/decorators/retry.py`.
 
-Defines a reusable `with_retry` decorator for retrying a function on failure.
-Supports exponential backoff and configurable retry limits.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-This is useful for wrapping external service calls (e.g., LLMs, DBs, HTTP)
-that may intermittently fail and benefit from retry logic.
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 import logging
@@ -18,25 +13,22 @@ logger = logging.getLogger(__name__)
 
 
 def with_retry(max_retries: int = 3, backoff_factor: float = 1.5):
-    """
-    Decorator that retries a function on exception using exponential backoff.
+    """Summary of `with_retry`.
 
     Args:
-        max_retries (int): Maximum number of attempts before failing.
-        backoff_factor (float): Multiplier for the delay between retries.
+        max_retries (int): Description of max_retries, default=3.
+        backoff_factor (float): Description of backoff_factor, default=1.5.
 
     Returns:
-        Callable: Wrapped function with retry logic.
+        Any: Description of return value.
 
     Raises:
-        RuntimeError: If all retry attempts fail.
+        RuntimeError: Condition when this is raised.
 
-    Example:
-        @with_retry(max_retries=5, backoff_factor=2)
-        def call_api(): ...
     """
 
     def decorator(func):
+
         def wrapper(*args, **kwargs):
             retries = 0
             delay = 1

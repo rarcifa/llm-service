@@ -1,10 +1,12 @@
-"""Utilities for evaluating LLM responses (scores + tracing).
+"""Module documentation for `app/domain/eval/utils/eval_utils.py`.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
+
+Generated on 2025-08-15.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 import re
 import subprocess
@@ -33,10 +35,18 @@ from app.enums.prompts import ModelType, ScoreKey
 def score_groundedness_with_embeddings(
     response: str, retrieved_docs: list[str]
 ) -> float:
-    """Cosine similarity between response and retrieved context via sentence embeddings."""
+    """Summary of `score_groundedness_with_embeddings`.
+
+    Args:
+        response (str): Description of response.
+        retrieved_docs (list[str]): Description of retrieved_docs.
+
+    Returns:
+        float: Description of return value.
+
+    """
     if not retrieved_docs:
         return 0.0
-
     model = get_embedding_model()
     doc_text = "\n".join(retrieved_docs)
     response_emb = model.encode(response, convert_to_tensor=True)
@@ -54,38 +64,56 @@ def score_helpfulness_with_llm(
     conversation_history: list[str] | None = None,
     model_name: Any = ModelType.LLAMA3,
 ) -> str:
-    """Use a local LLM (via `ollama`) to score helpfulness with a judge prompt."""
+    """Summary of `score_helpfulness_with_llm`.
+
+    Args:
+        prompt (str): Description of prompt.
+        response (str): Description of response.
+        helpfulness_template (str): Description of helpfulness_template.
+        conversation_history (list[str] | None): Description of conversation_history, default=None.
+        model_name (Any): Description of model_name, default=ModelType.LLAMA3.
+
+    Returns:
+        str: Description of return value.
+
+    """
     history_block = (
         "\n\nConversation History:\n"
-        + "\n".join(f"{msg.role.capitalize()}: {msg.content}" for msg in conversation_history)  # type: ignore[attr-defined]
+        + "\n".join(
+            (f"{msg.role.capitalize()}: {msg.content}" for msg in conversation_history)
+        )
         if conversation_history
         else ""
     )
-
     judge_prompt = Template(helpfulness_template).render(
         prompt=prompt, response=response, history_block=history_block
     )
-
     result = subprocess.run(
         [OLLAMA_CLI, OLLAMA_CMD, model_name],
         input=judge_prompt.encode(),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
-
     return result.stdout.decode().strip()
 
 
 @catch_and_log_errors(default_return={"error": EvalErrorType.COMPUTE_RATING})
 def compute_rating(grounding_score: float, judgment: str) -> str:
-    """Map grounding + helpfulness to PASS/FAIL/NEUTRAL using configured thresholds."""
-    """Map grounding + helpfulness to PASS/FAIL/NEUTRAL using manifest thresholds."""
-    """Map grounding + helpfulness to PASS or FAIL using manifest minimums."""
-    score = extract_score_from_judgment(judgment)
+    """Summary of `compute_rating`.
 
+    Args:
+        grounding_score (float): Description of grounding_score.
+        judgment (str): Description of judgment.
+
+    Returns:
+        str: Description of return value.
+
+    """
+    "Map grounding + helpfulness to PASS/FAIL/NEUTRAL using manifest thresholds."
+    "Map grounding + helpfulness to PASS or FAIL using manifest minimums."
+    score = extract_score_from_judgment(judgment)
     gp = float(config.eval.grounding_min)
     hp = int(config.eval.helpfulness_min)
-
     if grounding_score >= gp and score >= hp:
         return RatingKey.PASS
     return RatingKey.FAIL
@@ -93,15 +121,22 @@ def compute_rating(grounding_score: float, judgment: str) -> str:
 
 @catch_and_log_errors(default_return={"error": EvalErrorType.HALLUCINATION_DETECTION})
 def detect_hallucination(response: str, retrieved_docs: list[str]) -> str:
-    """Heuristic token-overlap hallucination detector (LOW/MEDIUM/HIGH)."""
+    """Summary of `detect_hallucination`.
+
+    Args:
+        response (str): Description of response.
+        retrieved_docs (list[str]): Description of retrieved_docs.
+
+    Returns:
+        str: Description of return value.
+
+    """
     if not retrieved_docs:
         return HallucinationKey.HIGH
-
     response_tokens = set(response.lower().split())
     context_tokens = set(" ".join(retrieved_docs).lower().split())
     overlap = response_tokens & context_tokens
     ratio = len(overlap) / (len(response_tokens) or 1)
-
     if ratio > 0.4:
         return HallucinationKey.LOW
     if ratio > 0.2:
@@ -110,8 +145,16 @@ def detect_hallucination(response: str, retrieved_docs: list[str]) -> str:
 
 
 def extract_score_from_judgment(judgment: str) -> int:
-    """Extract a numeric score (1–5) from judge output; 0 if not found."""
-    match = re.search(r"\b([1-5])\b", judgment)
+    """Summary of `extract_score_from_judgment`.
+
+    Args:
+        judgment (str): Description of judgment.
+
+    Returns:
+        int: Description of return value.
+
+    """
+    match = re.search("\\b([1-5])\\b", judgment)
     return int(match.group(1)) if match else 0
 
 
@@ -123,7 +166,19 @@ def compute_scores(
     conversation_history: list[str] | None,
     helpfulness_template: str,
 ) -> dict:
-    """Run evaluation suite and return structured scores + retrieval metadata."""
+    """Summary of `compute_scores`.
+
+    Args:
+        filtered_input (str): Description of filtered_input.
+        response (str): Description of response.
+        retrieved_docs (list[str]): Description of retrieved_docs.
+        conversation_history (list[str] | None): Description of conversation_history.
+        helpfulness_template (str): Description of helpfulness_template.
+
+    Returns:
+        dict: Description of return value.
+
+    """
     grounding_score = score_groundedness_with_embeddings(response, retrieved_docs)
     helpfulness_output = score_helpfulness_with_llm(
         prompt=filtered_input,
@@ -133,7 +188,6 @@ def compute_scores(
     )
     hallucination_risk = detect_hallucination(response, retrieved_docs)
     rating = compute_rating(grounding_score, helpfulness_output)
-
     return {
         ScoreKey.GROUNDING: grounding_score,
         ScoreKey.HELPFULNESS: helpfulness_output,
@@ -144,9 +198,12 @@ def compute_scores(
 
 
 def trace_eval_span(meta: dict, scores: dict) -> None:
-    """Attach evaluation metadata and scores to the current OpenTelemetry span.
+    """Summary of `trace_eval_span`.
 
-    Long strings (>200 chars) are truncated to reduce span payload size.
+    Args:
+        meta (dict): Description of meta.
+        scores (dict): Description of scores.
+
     """
     span = get_current_span()
     for k, v in {**meta, **scores}.items():
@@ -157,7 +214,16 @@ def trace_eval_span(meta: dict, scores: dict) -> None:
 
 
 def build_doc_metadata(query: str, docs: List[str]) -> List[Dict]:
-    """Build similarity metadata for retrieved documents."""
+    """Summary of `build_doc_metadata`.
+
+    Args:
+        query (str): Description of query.
+        docs (List[str]): Description of docs.
+
+    Returns:
+        List[Dict]: Description of return value.
+
+    """
     model = get_embedding_model()
     query_embedding = model.encode(query, convert_to_tensor=True)
     out: List[Dict] = []

@@ -1,32 +1,16 @@
-"""
-eval.py
+"""Module documentation for `app/enums/errors/eval.py`.
 
-Defines EvalErrorType enum used to categorize and trace errors
-that occur during evaluation steps such as grounding scoring,
-helpfulness judging, hallucination detection, and final rating.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-This improves observability, logging, and debugging when
-integrated with error decorators and tracing.
-
-Author: Ricardo Arcifa
-Created: 2025-08-06
+Generated on 2025-08-15.
 """
 
 from enum import StrEnum
 
 
 class EvalErrorType(StrEnum):
-    """
-    Enum representing evaluation-related error categories.
-
-    Attributes:
-        SCORE_GROUNDEDNESS (str): Error during embedding-based grounding calculation.
-        SCORE_HELPFULNESS (str): Error from LLM-based helpfulness scoring.
-        COMPUTE_RATING (str): Error while computing pass/fail rating.
-        HALLUCINATION_DETECTION (str): Error in overlap-based hallucination detection.
-        TRACE_SPAN (str): Error during OpenTelemetry span tagging.
-        BUILD_DOC_METADATA (str): Error building document metadata for eval trace.
-    """
+    """Summary of `EvalErrorType`."""
 
     SCORE_GROUNDEDNESS = "[eval/score_groundedness_with_embeddings] error"
     SCORE_HELPFULNESS = "[eval/score_helpfulness_with_llm] error"

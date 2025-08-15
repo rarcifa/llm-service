@@ -1,11 +1,9 @@
-"""
-string_utils.py
+"""Module documentation for `app/common/utils/strings.py`.
 
-Utility function for safely truncating long strings with optional length limits.
-Includes error handling and fallback behavior.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from app.common.decorators.errors import catch_and_log_errors
@@ -13,20 +11,19 @@ from app.common.decorators.errors import catch_and_log_errors
 
 @catch_and_log_errors(default_return="[truncated]")
 def truncate_string(s: str, max_length: int = 200) -> str:
-    """
-    Truncates a string to a maximum length and appends '...' if it's too long.
+    """Summary of `truncate_string`.
 
     Args:
-        s (str): The input string to truncate.
-        max_length (int, optional): Maximum allowed length. Defaults to 200.
+        s (str): Description of s.
+        max_length (int): Description of max_length, default=200.
 
     Returns:
-        str: The truncated string, or the original if within limit.
+        str: Description of return value.
 
     Raises:
-        TypeError: If `s` is not a string.
+        TypeError: Condition when this is raised.
+
     """
     if not isinstance(s, str):
         raise TypeError("truncate_string expects a string")
-
     return s if len(s) <= max_length else s[:max_length] + "..."

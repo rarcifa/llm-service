@@ -1,5 +1,12 @@
+"""Module documentation for `app/domain/ingestion/impl/chroma_ingester.py`.
+
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
+
+Generated on 2025-08-15.
+"""
+
 from __future__ import annotations
-# app/domain/ingestion/impl/pgvector_ingester.py
 
 import hashlib
 import uuid
@@ -19,11 +26,29 @@ logger = setup_logger()
 
 
 def _sha256(text: str) -> str:
+    """Summary of `_sha256`.
+
+    Args:
+        text (str): Description of text.
+
+    Returns:
+        str: Description of return value.
+
+    """
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
 def _safe_metadata(meta: dict, *, max_len: int = 8192) -> dict:
-    """Ensure pgvector JSONB metadata stores only JSON-serializable, small-ish values."""
+    """Summary of `_safe_metadata`.
+
+    Args:
+        meta (dict): Description of meta.
+        max_len (int): Description of max_len, default=8192.
+
+    Returns:
+        dict: Description of return value.
+
+    """
     out = {}
     for k, v in (meta or {}).items():
         if isinstance(v, (str, int, float, bool)) or v is None:
@@ -35,47 +60,64 @@ def _safe_metadata(meta: dict, *, max_len: int = 8192) -> dict:
 
 
 class PgVectorIngester(IngesterBase):
-    """
-    Ingests documents into Postgres (pgvector) using sentence-transformers embeddings.
-    Reads config from manifest via config.retrieval.* and config.memory.collection_name.
+    """Summary of `PgVectorIngester`.
+
+    Attributes:
+        chunk_size: Description of `chunk_size`.
+        collection: Description of `collection`.
+        docs_root: Description of `docs_root`.
+        model: Description of `model`.
+        patterns: Description of `patterns`.
     """
 
     def __init__(self) -> None:
+        """Summary of `__init__`.
+
+        Args:
+            self: Description of self.
+
+        """
         self.model = get_embedding_model()
         self.collection = config.memory.collection_name
         self.chunk_size = config.retrieval.chunk_size
-
-        # root folder and globs come from manifest
         self.docs_root = Path(config.retrieval.docs_path)
         self.patterns = list(config.retrieval.include_ext)
-
-        # ensure data dir exists (not strictly required, but nice to have)
         self.docs_root.mkdir(parents=True, exist_ok=True)
 
     @catch_and_log_errors()
     def _embed_chunks(self, chunks: List[str]) -> List[List[float]]:
-        # .tolist() to get vanilla Python lists for psycopg2-json serialization
+        """Summary of `_embed_chunks`.
+
+        Args:
+            self: Description of self.
+            chunks (List[str]): Description of chunks.
+
+        Returns:
+            List[List[float]]: Description of return value.
+
+        """
         return self.model.encode(chunks).tolist()
 
     @with_retry(max_retries=3)
     @catch_and_log_errors()
     def _ingest_file(self, file_path: Path) -> None:
+        """Summary of `_ingest_file`.
+
+        Args:
+            self: Description of self.
+            file_path (Path): Description of file_path.
+
+        """
         text = file_path.read_text(encoding="utf-8", errors="ignore")
         chunks = chunk_text(text, self.chunk_size)
         if not chunks:
             return
-
         vectors = self._embed_chunks(chunks)
-
         with get_pgvector_repo(distance="cosine") as repo:
             for i, chunk in enumerate(chunks):
                 emb = vectors[i]
                 metadata = _safe_metadata(
-                    {
-                        "source": file_path.name,
-                        "path": str(file_path),
-                        "chunk": i,
-                    }
+                    {"source": file_path.name, "path": str(file_path), "chunk": i}
                 )
                 repo.upsert(
                     collection=self.collection,
@@ -83,11 +125,20 @@ class PgVectorIngester(IngesterBase):
                     document=chunk,
                     metadata=metadata,
                     content_sha256=_sha256(chunk),
-                    # optional: custom id; default inside repo is fine too
                     id_override=str(uuid.uuid4()),
                 )
 
     def ingest_paths(self, paths: Iterable[str | Path]) -> int:
+        """Summary of `ingest_paths`.
+
+        Args:
+            self: Description of self.
+            paths (Iterable[str | Path]): Description of paths.
+
+        Returns:
+            int: Description of return value.
+
+        """
         count = 0
         for p in paths:
             p = Path(p)
@@ -102,14 +153,24 @@ class PgVectorIngester(IngesterBase):
     def ingest_glob(
         self, root: Optional[str | Path] = None, patterns: Optional[list[str]] = None
     ) -> int:
+        """Summary of `ingest_glob`.
+
+        Args:
+            self: Description of self.
+            root (Optional[str | Path]): Description of root, default=None.
+            patterns (Optional[list[str]]): Description of patterns, default=None.
+
+        Returns:
+            int: Description of return value.
+
+        """
         from glob import glob
 
         root_path = Path(root) if root else self.docs_root
         exts = patterns or self.patterns
-
         files: list[Path] = []
         for ext in exts:
-            files.extend(Path(f) for f in glob(str(root_path / ext)))
+            files.extend((Path(f) for f in glob(str(root_path / ext))))
         logger.info(
             "Found files to ingest",
             count=len(files),

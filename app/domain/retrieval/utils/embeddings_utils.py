@@ -1,6 +1,12 @@
-"""Utility functions for sentence embedding models and cached encodes."""
-from __future__ import annotations
+"""Module documentation for `app/domain/retrieval/utils/embeddings_utils.py`.
 
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
+
+Generated on 2025-08-15.
+"""
+
+from __future__ import annotations
 
 from functools import lru_cache
 from typing import List
@@ -9,32 +15,34 @@ from sentence_transformers import SentenceTransformer
 
 from app.config import config
 
-# Lazily initialized singleton model
 _model: SentenceTransformer | None = None
 
 
 def get_embedding_model() -> SentenceTransformer:
-    """Return a lazily initialized embedding model instance.
+    """Summary of `get_embedding_model`.
+
+    Args:
+        (no arguments)
 
     Returns:
-        The loaded SentenceTransformer model.
+        SentenceTransformer: Description of return value.
+
     """
     global _model
     if _model is None:
-        # Read embedding model from config.retrieval.embeddings_model
         _model = SentenceTransformer(config.retrieval.embeddings_model)
     return _model
 
 
 @lru_cache(maxsize=2048)
 def get_cached_embedding(text: str) -> List[float]:
-    """Return a cached embedding vector for the given text.
+    """Summary of `get_cached_embedding`.
 
     Args:
-        text: Input string to embed.
+        text (str): Description of text.
 
     Returns:
-        Embedding as a list of floats.
+        List[float]: Description of return value.
+
     """
-    # encode returns a numpy array; convert to list for JSON/serialization friendliness
     return get_embedding_model().encode([text])[0].tolist()

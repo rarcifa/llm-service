@@ -1,14 +1,12 @@
-"""Agent utility functions (pure, function-only).
+"""Module documentation for `app/domain/agent/utils/agent_utils.py`.
 
-- Input sanitization with safety filters
-- Prompt rendering with Jinja2
-- Streaming capture wrapper
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 from typing import Any, Callable, Generator, List
 
@@ -27,10 +25,20 @@ from app.enums.tools import ToolKey, ToolName
 
 @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_SANITIZE_INPUT})
 def sanitize_io(user_input: str) -> str:
-    """Sanitize and normalize user input (PII redaction + profanity filtering)."""
+    """Summary of `sanitize_io`.
+
+    Args:
+        user_input (str): Description of user_input.
+
+    Returns:
+        str: Description of return value.
+
+    Raises:
+        ValueError: Condition when this is raised.
+
+    """
     if detect_prompt_injection(user_input):
         raise ValueError("Prompt injection detected.")
-    
     safe_input = redact_pii(user_input)
     filtered = filter_profanity(safe_input)
     return filtered or user_input.strip()
@@ -38,31 +46,33 @@ def sanitize_io(user_input: str) -> str:
 
 @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_RENDER_PROMPT})
 def render_prompt(filtered_input: str, context_chunks: List[str]) -> str:
-    """Render a Jinja2 prompt using input and retrieved context."""
+    """Summary of `render_prompt`.
 
-    # In the new config, prompt templates live in config.prompts.registry_dir.
-    # You’d typically use PromptRegistry to load them — here assuming you want
-    # the QA prompt (agent/qa) and its `name` placeholder.
+    Args:
+        filtered_input (str): Description of filtered_input.
+        context_chunks (List[str]): Description of context_chunks.
+
+    Returns:
+        str: Description of return value.
+
+    Raises:
+        ValueError: Condition when this is raised.
+
+    """
     from app.registry.prompt_registry import PromptRegistry
 
     reg = PromptRegistry(base_path=str(config.prompts.registry_dir))
-    qa_record = reg.get("agent/qa")  # returns PromptRecord
-
+    qa_record = reg.get("agent/qa")
     qa_name = qa_record.name or "Agent"
-    qa_template = qa_record.template  # this is the old qa_prompt["template"]
-
-
+    qa_template = qa_record.template
     missing = verify_prompt_variables(
         qa_template,
         {PromptConfigKey.NAME: qa_name, "context": "...", "input": filtered_input},
     )
     if missing:
         raise ValueError(f"Unresolved prompt variables: {missing}")
-
     prompt = Template(qa_template).render(
-        name=qa_name,
-        context="\n".join(context_chunks),
-        input=filtered_input,
+        name=qa_name, context="\n".join(context_chunks), input=filtered_input
     )
     if "{{" in prompt or "}}" in prompt:
         raise ValueError("Unresolved placeholders in rendered prompt.")
@@ -71,10 +81,18 @@ def render_prompt(filtered_input: str, context_chunks: List[str]) -> str:
 
 @catch_and_log_errors(default_return={"error": AgentErrorType.AGENT_STREAM_CAPTURE})
 def stream_with_capture(
-    stream: Generator[str, None, None],
-    on_complete: Callable[[str], Any] | None = None,
+    stream: Generator[str, None, None], on_complete: Callable[[str], Any] | None = None
 ) -> Generator[str, None, None]:
-    """Wrap a token/chunk generator to capture full output while streaming."""
+    """Summary of `stream_with_capture`.
+
+    Args:
+        stream (Generator[str, None, None]): Description of stream.
+        on_complete (Callable[[str], Any] | None): Description of on_complete, default=None.
+
+    Returns:
+        Generator[str, None, None]: Description of return value.
+
+    """
     buffer: List[str] = []
 
     def generator() -> Generator[str, None, None]:

@@ -1,29 +1,16 @@
-"""
-tools.py
+"""Module documentation for `app/enums/tools.py`.
 
-Defines enums related to tool names and tool metadata keys used in the dynamic
-tool registry for the agent framework. These tools include document search,
-PII redaction, and profanity filtering.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Used to register and access tool functions and metadata consistently across
-the system via `ToolName` and `ToolKey`.
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from enum import StrEnum
 
 
 class ToolName(StrEnum):
-    """
-    Enum of tool identifiers used in the system.
-
-    Attributes:
-        SEARCH_DOCS: Tool for vector-based document search or RAG.
-        PII_REDACTOR: Tool that redacts personally identifiable information.
-        PROFANITY_FILTER: Tool that removes or sanitizes offensive language.
-    """
+    """Summary of `ToolName`."""
 
     SEARCH_DOCS = "search_docs"
     PII_REDACTOR = "presidio"
@@ -35,13 +22,7 @@ class ToolName(StrEnum):
 
 
 class ToolKey(StrEnum):
-    """
-    Enum of metadata keys used to access tool components in the registry.
-
-    Attributes:
-        FUNCTION: Key to access the callable function.
-        DESCRIPTION: Key to access the human-readable description of the tool.
-    """
+    """Summary of `ToolKey`."""
 
     FUNCTION = "function"
     DESCRIPTION = "description"

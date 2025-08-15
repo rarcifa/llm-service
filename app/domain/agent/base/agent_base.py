@@ -1,31 +1,35 @@
-"""Agent pipeline contract (base).
+"""Module documentation for `app/domain/agent/base/agent_base.py`.
 
-Defines the contract for building sanitized input, tool plan, context,
-and the final rendered prompt. No concrete deps or config here.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
-from __future__ import annotations
 
+from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Tuple
 
 
 class AgentBase(ABC):
-    """Abstract interface for agent pipeline assembly."""
+    """Summary of `AgentBase`."""
 
     @abstractmethod
     def build(
         self, user_input: str
     ) -> Tuple[str, str, List[str], List[Dict[str, Any]]]:
-        """Assemble sanitized input, rendered prompt, context chunks, and tool plan.
+        """Summary of `build`.
 
         Args:
-            user_input: Raw user input.
+            self: Description of self.
+            user_input (str): Description of user_input.
 
         Returns:
-            (filtered_input, rendered_prompt, context_chunks, plan)
+            Tuple[str, str, List[str], List[Dict[str, Any]]]: Description of return value.
+
+        Raises:
+            NotImplementedError: Condition when this is raised.
+
         """
         raise NotImplementedError

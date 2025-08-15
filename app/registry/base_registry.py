@@ -1,75 +1,84 @@
-"""
-base_registry.py
+"""Module documentation for `app/registry/base_registry.py`.
 
-Defines a lightweight, typed base class for registries that cache named items.
-Subclasses implement `_load_all()` to populate `.cache` and `_card()` to expose
-metadata for UI/diagnostics.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Typical usage:
-    class MyRegistry(BaseRegistry[MyItem]):
-        def _load_all(self) -> None: ...
-        def _card(self, item: MyItem) -> dict: ...
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from __future__ import annotations
+
 from typing import Dict, Generic, Iterable, List, Mapping, MutableMapping, TypeVar
 
 ItemT = TypeVar("ItemT")
 
 
 class RegistryError(RuntimeError):
-    """Generic registry error."""
+    """Summary of `RegistryError`."""
 
 
 class ItemNotFound(KeyError):
-    """Raised when a requested item is not found in the registry."""
+    """Summary of `ItemNotFound`."""
 
 
 class BaseRegistry(Generic[ItemT]):
-    """
-    Base class for name → item registries with in-memory caching.
+    """Summary of `BaseRegistry`.
 
     Attributes:
-        cache (dict[str, ItemT]): Loaded items keyed by name.
+        cache: Description of `cache`.
     """
 
     def __init__(self) -> None:
+        """Summary of `__init__`.
+
+        Args:
+            self: Description of self.
+
+        """
         self.cache: MutableMapping[str, ItemT] = {}
         self._load_all()
 
-    # --- required subclass hooks ------------------------------------------------
-
     def _load_all(self) -> None:
-        """
-        Populate `self.cache` with all available items.
-        Subclasses must implement this method.
+        """Summary of `_load_all`.
+
+        Args:
+            self: Description of self.
+
+        Raises:
+            NotImplementedError: Condition when this is raised.
+
         """
         raise NotImplementedError
 
     def _card(self, item: ItemT) -> dict:
-        """
-        Return a JSON-serializable metadata card for `item`.
-        Subclasses must implement this method.
+        """Summary of `_card`.
+
+        Args:
+            self: Description of self.
+            item (ItemT): Description of item.
+
+        Returns:
+            dict: Description of return value.
+
+        Raises:
+            NotImplementedError: Condition when this is raised.
+
         """
         raise NotImplementedError
 
-    # --- shared API -------------------------------------------------------------
-
     def get(self, name: str) -> ItemT:
-        """
-        Retrieve an item by name.
+        """Summary of `get`.
 
         Args:
-            name: Item key.
+            self: Description of self.
+            name (str): Description of name.
 
         Returns:
-            The cached item.
+            ItemT: Description of return value.
 
         Raises:
-            ItemNotFound: If the item is not present.
+            ItemNotFound: Condition when this is raised.
+
         """
         try:
             return self.cache[name]
@@ -77,22 +86,50 @@ class BaseRegistry(Generic[ItemT]):
             raise ItemNotFound(name) from e
 
     def has(self, name: str) -> bool:
-        """Return True if an item with `name` exists."""
+        """Summary of `has`.
+
+        Args:
+            self: Description of self.
+            name (str): Description of name.
+
+        Returns:
+            bool: Description of return value.
+
+        """
         return name in self.cache
 
     def keys(self) -> List[str]:
-        """List of item names in the registry."""
+        """Summary of `keys`.
+
+        Args:
+            self: Description of self.
+
+        Returns:
+            List[str]: Description of return value.
+
+        """
         return list(self.cache.keys())
 
     def items(self) -> Iterable[tuple[str, ItemT]]:
-        """Iterator over (name, item) pairs."""
+        """Summary of `items`.
+
+        Args:
+            self: Description of self.
+
+        Returns:
+            Iterable[tuple[str, ItemT]]: Description of return value.
+
+        """
         return self.cache.items()
 
     def cards(self) -> list[dict]:
-        """
-        Build metadata cards for all items (e.g., for UIs and logs).
+        """Summary of `cards`.
+
+        Args:
+            self: Description of self.
 
         Returns:
-            A list of JSON-serializable dicts.
+            list[dict]: Description of return value.
+
         """
         return [self._card(item) for item in self.cache.values()]

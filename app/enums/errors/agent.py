@@ -1,24 +1,16 @@
-"""
-agent.py
+"""Module documentation for `app/enums/errors/agent.py`.
 
-Defines standardized error type enums for categorizing agent-related failures.
-Used to label and return consistent error codes across agent pipeline components.
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from enum import StrEnum
 
 
 class AgentErrorType(StrEnum):
-    """
-    Enum representing different categories of agent errors.
-
-    Attributes:
-        AGENT_RUN: Error during synchronous agent run.
-        AGENT_BACKGROUND_EVAL: Error during background evaluation.
-    """
+    """Summary of `AgentErrorType`."""
 
     AGENT_RUN = "[agent/run] error"
     AGENT_BACKGROUND_EVAL = "[agent/_background_eval] error"

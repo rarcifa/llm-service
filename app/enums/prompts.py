@@ -1,44 +1,22 @@
-"""
-prompts.py
+"""Module documentation for `app/enums/prompts.py`.
 
-Defines enums for:
-- Model types
-- Evaluation score keys
-- JSON serialization keys
-- Prompt configuration keys
-- Conversation role identifiers
+This module is part of an enterprise-grade, research-ready codebase.
+Docstrings follow the Google Python style guide for consistency and clarity.
 
-These enums support structured access to commonly used keys across the
-agent pipeline: prompt rendering, scoring, logging, persistence, and feedback.
-
-Author: Ricardo Arcifa
-Created: 2025-02-03
+Generated on 2025-08-15.
 """
 
 from enum import StrEnum
 
 
 class ModelType(StrEnum):
-    """
-    Enum for supported model types.
-
-    Attributes:
-        LLAMA3: Refers to the LLaMA3 language model family.
-    """
+    """Summary of `ModelType`."""
 
     LLAMA3 = "llama3"
 
 
 class ScoreKey(StrEnum):
-    """
-    Enum for evaluation metric keys.
-
-    Attributes:
-        HELPFULNESS: Score for helpfulness.
-        GROUNDING: Grounding evaluation score.
-        HALLUCINATION: Hallucination risk score.
-        RATING: Overall rating score.
-    """
+    """Summary of `ScoreKey`."""
 
     HELPFULNESS = "eval.helpfulness"
     GROUNDING = "eval.grounding_score"
@@ -47,20 +25,7 @@ class ScoreKey(StrEnum):
 
 
 class JsonKey(StrEnum):
-    """
-    Keys used for structured JSON responses and logs.
-
-    Attributes:
-        SESSION_ID: Unique session identifier (⚠️ typo: 'session_id' should be fixed).
-        RESPONSE_ID: Unique identifier for the model response.
-        TRACE_ID: Identifier used for tracing/logging purposes.
-        FEEDBACK_ID: ID for human or system feedback record.
-        MESSAGE_ID: ID for a message in a conversation.
-        RATING: Final human/eval rating.
-        STATUS: Status of the response or evaluation.
-        INPUT: Original user input.
-        RESPONSE: Model's generated response.
-    """
+    """Summary of `JsonKey`."""
 
     SESSION_ID = "session_id"
     RESPONSE_ID = "response_id"
@@ -74,16 +39,7 @@ class JsonKey(StrEnum):
 
 
 class PromptConfigKey(StrEnum):
-    """
-    Keys used in prompt configuration and template rendering.
-
-    Attributes:
-        TEMPLATE: Full prompt template content.
-        TEMPLATE_NAME: Template identifier (e.g., 'qa', 'chat').
-        VERSION: Prompt version number or hash.
-        NAME: Friendly name for the prompt.
-        ID: Unique ID for the prompt instance.
-    """
+    """Summary of `PromptConfigKey`."""
 
     TEMPLATE = "template"
     TEMPLATE_NAME = "template_name"
@@ -93,13 +49,7 @@ class PromptConfigKey(StrEnum):
 
 
 class RoleKey(StrEnum):
-    """
-    Role identifiers used in chat or conversation history.
-
-    Attributes:
-        USER: Indicates a user message.
-        AGENT: Indicates an agent (model) response.
-    """
+    """Summary of `RoleKey`."""
 
     USER = "user"
     AGENT = "agent"
