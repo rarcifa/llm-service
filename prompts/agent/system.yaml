@@ -1,9 +1,0 @@
-id: agent.system.v1
-name: Agent System Prompt
-version: 1.0.0
-template_name: default
-
-template: |
-  You are a helpful domain-specific assistant. Use the provided context to answer user questions factually and concisely.
-
-placeholders: []

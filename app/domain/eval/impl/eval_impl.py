@@ -12,7 +12,7 @@ import datetime
 import uuid
 from typing import Any
 
-from app.common.decorators.tracing import trace_span
+from app.common.decorators.tracing import get_tracer, setup_tracing, trace_span
 from app.common.utils.logger import setup_logger
 from app.config import config
 from app.domain.eval.base.eval_base import EvalBase
@@ -20,6 +20,8 @@ from app.domain.eval.utils.eval_utils import compute_scores, trace_eval_span
 from app.enums.eval import EvalKey, TraceMetaKey
 
 logger = setup_logger()
+setup_tracing()
+tracer = get_tracer(__name__)
 
 
 class EvalImpl(EvalBase):
@@ -70,7 +72,7 @@ class EvalImpl(EvalBase):
             response=response,
             retrieved_docs=retrieved_docs,
             conversation_history=conversation_history,
-            helpfulness_template=config.prompts.loaded["eval/helpfulness"].template,
+            helpfulness_template=config.prompts.eval.helpfulness.template,
         )
         meta = {
             TraceMetaKey.TRACE_ID: trace_id,

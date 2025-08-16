@@ -113,8 +113,8 @@ def compute_rating(grounding_score: float, judgment: str) -> str:
     "Map grounding + helpfulness to PASS/FAIL/NEUTRAL using manifest thresholds."
     "Map grounding + helpfulness to PASS or FAIL using manifest minimums."
     score = extract_score_from_judgment(judgment)
-    gp = float(config.eval.grounding_min)
-    hp = int(config.eval.helpfulness_min)
+    gp = float(config.eval.thresholds.grounding_min)
+    hp = int(config.eval.thresholds.helpfulness_min)
     if grounding_score >= gp and score >= hp:
         return RatingKey.PASS
     return RatingKey.FAIL
