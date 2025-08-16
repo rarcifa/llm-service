@@ -11,13 +11,13 @@ from __future__ import annotations
 from presidio_analyzer import AnalyzerEngine
 from presidio_anonymizer import AnonymizerEngine
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 
 _analyzer = AnalyzerEngine()
 _anonymizer = AnonymizerEngine()
 
 
-@catch_and_log_errors(default_return="[PII REDACTION FAILED]")
+@error_boundary(default_return="[PII REDACTION FAILED]")
 def redact_pii(text: str) -> str:
     """Summary of `redact_pii`.
 

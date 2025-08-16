@@ -9,13 +9,13 @@ Generated on 2025-08-15.
 from pathlib import Path
 from typing import List
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 from app.common.utils.logger import setup_logger
 
 logger = setup_logger()
 
 
-@catch_and_log_errors(default_return=[])
+@error_boundary(default_return=[])
 def find_files_by_extension(directory: str, extensions: List[str]) -> List[str]:
     """Summary of `find_files_by_extension`.
 

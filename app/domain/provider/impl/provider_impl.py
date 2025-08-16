@@ -8,15 +8,15 @@ Generated on 2025-08-15.
 
 from typing import Any, Dict, Generator, List
 
-from app.common.error_handling import error_boundary
+from app.common.decorators.errors import error_boundary
 from app.config import config
 from app.domain.provider.base.provider_base import ProviderBase
 from app.domain.provider.impl.ollama_client import OllamaClient
 from app.enums.prompts import RoleKey
 
 
-class Provider(ProviderBase):
-    """Summary of `Provider`.
+class ProviderImpl(ProviderBase):
+    """Summary of `ProviderImpl`.
 
     Attributes:
         client: Description of `client`.
@@ -35,7 +35,7 @@ class Provider(ProviderBase):
         """
         self.client = client or OllamaClient()
 
-    @error_boundary(message="Provider.run failed")
+    @error_boundary()
     def run(self, prompt: str) -> str:
         """Summary of `run`.
 
@@ -77,7 +77,7 @@ class Provider(ProviderBase):
             },
         )
 
-    @error_boundary(message="Provider.run_json failed")
+    @error_boundary()
     def run_json(self, prompt: str, *, temperature: float | None = None) -> Any:
         """Summary of `run_json`.
 
@@ -101,7 +101,7 @@ class Provider(ProviderBase):
             options={"temperature": temp, "num_ctx": config.models.main.max_tokens},
         )
 
-    @error_boundary(message="Provider.chat failed")
+    @error_boundary()
     def chat(self, messages: List[Dict[str, str]]) -> str:
         """Summary of `chat`.
 
@@ -122,7 +122,7 @@ class Provider(ProviderBase):
             },
         )
 
-    @error_boundary(message="Provider.chat_json failed")
+    @error_boundary()
     def chat_json(
         self, messages: List[Dict[str, str]], *, temperature: float | None = None
     ) -> Any:

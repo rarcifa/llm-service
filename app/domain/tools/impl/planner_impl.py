@@ -1,4 +1,4 @@
-"""Module documentation for `app/domain/tools/impl/tool_planner.py`.
+"""Module documentation for `app/domain/tools/impl/planner_impl.py`.
 
 This module is part of an enterprise-grade, research-ready codebase.
 Docstrings follow the Google Python style guide for consistency and clarity.
@@ -9,9 +9,9 @@ Generated on 2025-08-15.
 import json
 import logging
 
-from app.common.error_handling import error_boundary
+from app.common.decorators.errors import error_boundary
 from app.config import config
-from app.domain.provider.impl.ollama_provider import Provider
+from app.domain.provider.impl.provider_impl import ProviderImpl
 from app.domain.tools.base.tool_planner_base import ToolPlannerBase
 from app.registry.prompt_registry import PromptRegistry
 from app.registry.tool_registry import ToolRegistry
@@ -19,24 +19,8 @@ from app.registry.tool_registry import ToolRegistry
 logger = logging.getLogger("agent")
 
 
-@error_boundary(map_to=None, reraise=False, default=None, log=False)
-def _safe_run_json(provider: Provider, prompt: str, temperature: float):
-    """Summary of `_safe_run_json`.
-
-    Args:
-        provider (Provider): Description of provider.
-        prompt (str): Description of prompt.
-        temperature (float): Description of temperature.
-
-    Returns:
-        Any: Description of return value.
-
-    """
-    return provider.run_json(prompt, temperature=temperature)
-
-
-class ToolPlanner(ToolPlannerBase):
-    """Summary of `ToolPlanner`.
+class PlannerImpl(ToolPlannerBase):
+    """Summary of `PlannerImpl`.
 
     Attributes:
         provider: Description of `provider`.
@@ -59,7 +43,7 @@ class ToolPlanner(ToolPlannerBase):
         """
         self.use_llm = use_llm
         self.registry = ToolRegistry()
-        self.provider = Provider() if use_llm else None
+        self.provider = ProviderImpl() if use_llm else None
 
     def route(self, user_input: str):
         """Summary of `route`.
@@ -79,7 +63,7 @@ class ToolPlanner(ToolPlannerBase):
             "agent/planner",
             {"input": user_input, "tool_cards": json.dumps(self.registry.cards())},
         )
-        raw = _safe_run_json(self.provider, prompt, 0.0)
+        raw = self.provider.run_json(prompt, temperature=0.0)
         if raw is None:
             logger.warning("Planner JSON failed → PASS []")
             return []
@@ -88,7 +72,7 @@ class ToolPlanner(ToolPlannerBase):
         elif isinstance(raw, dict):
             plan = [raw]
         elif isinstance(raw, str):
-            parsed = _safe_run_json(self.provider, raw, 0.0)
+            parsed =self.provider.run_json(raw, temperature=0.0)
             if isinstance(parsed, list):
                 plan = parsed
             elif isinstance(parsed, dict):

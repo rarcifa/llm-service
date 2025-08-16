@@ -14,7 +14,7 @@ from typing import Any, Dict, Generator, List, Optional
 import requests
 from requests.adapters import HTTPAdapter, Retry
 
-from app.common.error_handling import error_boundary
+from app.common.decorators.errors import error_boundary
 
 
 class OllamaClient:
@@ -64,7 +64,7 @@ class OllamaClient:
             f"{self.base_url}{path}", json=payload, timeout=self.timeout, stream=stream
         )
 
-    @error_boundary(map_to=None, reraise=False, default=None, log=False)
+    @error_boundary()
     def _loads_or_none(self, text: str) -> Any:
         """Summary of `_loads_or_none`.
 
@@ -109,7 +109,7 @@ class OllamaClient:
                 return val
         raise ValueError("Model did not return valid JSON")
 
-    @error_boundary(message="OllamaClient.generate failed")
+    @error_boundary()
     def generate(
         self,
         model: str,
@@ -145,7 +145,7 @@ class OllamaClient:
         data = r.json()
         return data.get("response", "")
 
-    @error_boundary(message="OllamaClient.chat failed")
+    @error_boundary()
     def chat(
         self,
         model: str,
@@ -185,7 +185,7 @@ class OllamaClient:
         data = r.json()
         return data.get("message", {}).get("content", "")
 
-    @error_boundary(message="OllamaClient.generate_json failed")
+    @error_boundary()
     def generate_json(
         self,
         model: str,
@@ -210,7 +210,7 @@ class OllamaClient:
         text = self.generate(model, prompt, format="json", options=options, extra=extra)
         return self._parse_json_block(text)
 
-    @error_boundary(message="OllamaClient.chat_json failed")
+    @error_boundary()
     def chat_json(
         self,
         model: str,

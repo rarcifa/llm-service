@@ -6,10 +6,10 @@ Docstrings follow the Google Python style guide for consistency and clarity.
 Generated on 2025-08-15.
 """
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 
 
-@catch_and_log_errors(default_return="[truncated]")
+@error_boundary(default_return="[truncated]")
 def truncate_string(s: str, max_length: int = 200) -> str:
     """Summary of `truncate_string`.
 

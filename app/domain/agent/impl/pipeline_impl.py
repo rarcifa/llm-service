@@ -13,13 +13,13 @@ from typing import Any, Dict, List, Tuple
 from app.config import config
 from app.domain.agent.base.agent_base import AgentBase
 from app.domain.agent.utils.agent_utils import render_prompt, sanitize_io
-from app.domain.memory.impl.pgvector_memory import MemoryImpl
+from app.domain.memory.impl.memory_impl import MemoryImpl
 from app.domain.tools.impl.step_executor import StepExecutorImpl
-from app.domain.tools.impl.tool_planner import ToolPlanner
+from app.domain.tools.impl.planner_impl import PlannerImpl
 
 
-class Pipeline(AgentBase):
-    """Summary of `Pipeline`.
+class PipelineImpl(AgentBase):
+    """Summary of `PipelineImpl`.
 
     Attributes:
         memory: Description of `memory`.
@@ -34,7 +34,7 @@ class Pipeline(AgentBase):
             self: Description of self.
 
         """
-        self.planner = ToolPlanner(use_llm=True)
+        self.planner = PlannerImpl(use_llm=True)
         self.step_executor = StepExecutorImpl()
         self.memory = MemoryImpl(window_size=config.memory.window_size)
 

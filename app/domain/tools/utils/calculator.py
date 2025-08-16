@@ -9,7 +9,7 @@ Generated on 2025-08-15.
 import ast
 import operator as op
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 
 _OPS = {
     ast.Add: op.add,
@@ -23,8 +23,8 @@ _OPS = {
 }
 
 
-def _eval(node):
-    """Summary of `_eval`.
+def eval(node):
+    """Summary of `eval`.
 
     Args:
         node: Description of node.
@@ -43,13 +43,13 @@ def _eval(node):
             return node.value
         raise ValueError("constants other than numbers not allowed")
     if isinstance(node, ast.UnaryOp) and type(node.op) in _OPS:
-        return _OPS[type(node.op)](_eval(node.operand))
+        return _OPS[type(node.op)](eval(node.operand))
     if isinstance(node, ast.BinOp) and type(node.op) in _OPS:
-        return _OPS[type(node.op)](_eval(node.left), _eval(node.right))
+        return _OPS[type(node.op)](eval(node.left), eval(node.right))
     raise ValueError("unsupported expression")
 
 
-@catch_and_log_errors(default_return="[calculator error]")
+@error_boundary(default_return="[calculator error]")
 def calculator_tool(expression: str) -> str:
     """Summary of `calculator_tool`.
 
@@ -63,5 +63,5 @@ def calculator_tool(expression: str) -> str:
     expr = (expression or "").strip()
     expr = expr.replace("×", "*").replace("x", "*").replace("X", "*")
     tree = ast.parse(expr, mode="eval")
-    val = _eval(tree.body)
+    val = eval(tree.body)
     return str(int(val)) if isinstance(val, float) and val.is_integer() else str(val)

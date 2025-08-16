@@ -12,7 +12,7 @@ import re
 from functools import lru_cache
 from typing import Iterable
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 from app.common.utils.logger import setup_logger
 
 logger = setup_logger()
@@ -43,7 +43,7 @@ def _compiled_injection_regexes():
     return tuple(compiled)
 
 
-@catch_and_log_errors(default_return=False)
+@error_boundary(default_return=False)
 def detect_prompt_injection(text: str) -> bool:
     """Summary of `detect_prompt_injection`.
 

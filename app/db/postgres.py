@@ -12,7 +12,7 @@ from pgvector.psycopg2 import register_vector
 from sqlalchemy import create_engine, event
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 from app.constants.errors import POSTGRES_INIT_DB
 
 DATABASE_URL = os.getenv(
@@ -41,7 +41,7 @@ def _register_pgvector(dbapi_conn, _):
         pass
 
 
-@catch_and_log_errors(default_return={"error": POSTGRES_INIT_DB})
+@error_boundary(default_return={"error": POSTGRES_INIT_DB})
 def init_db() -> None:
     """Summary of `init_db`.
 

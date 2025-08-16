@@ -4,14 +4,14 @@ from jsonschema import validate
 import logging
 from typing import Any, Dict, List
 
-from app.common.error_handling import error_boundary
+from app.common.decorators.errors import error_boundary
 from app.domain.tools.base.step_executor_base import StepExecutorBase
 from app.registry.tool_registry import ToolRegistry
 
 logger = logging.getLogger(__name__)
 
 
-@error_boundary(map_to=None, reraise=False, default=False, log=False)
+@error_boundary()
 def _args_valid(schema: Dict[str, Any] | None, args: Dict[str, Any]) -> bool:
     """Summary of `_args_valid`.
 

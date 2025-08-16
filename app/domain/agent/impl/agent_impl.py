@@ -12,17 +12,17 @@ import threading
 import uuid
 from typing import Generator
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 from app.common.decorators.tracing import get_tracer, setup_tracing
 from app.common.utils.logger import setup_logger
 from app.config import config
 from app.constants.errors import AGENT_STREAM_CAPTURE
 from app.db.repositories.session_repository import get_session_repo
-from app.domain.agent.impl.persistence import persist_conversation
-from app.domain.agent.impl.pipeline import Pipeline
+from app.domain.agent.utils.agent_utils import persist_conversation
+from app.domain.agent.impl.pipeline_impl import PipelineImpl
 from app.domain.agent.utils.agent_utils import stream_with_capture
 from app.domain.eval.impl.eval_impl import EvalImpl
-from app.domain.provider.impl.ollama_provider import Provider
+from app.domain.provider.impl.provider_impl import ProviderImpl
 from app.enums.eval import EvalResultKey, RetrievalDocKey
 from app.enums.prompts import JsonKey
 
@@ -48,10 +48,10 @@ class AgentImpl:
 
         """
         self.eval = EvalImpl()
-        self.provider = Provider()
-        self.pipeline = Pipeline()
+        self.provider = ProviderImpl()
+        self.pipeline = PipelineImpl()
 
-    @catch_and_log_errors(default_return={"error": AGENT_STREAM_CAPTURE})
+    @error_boundary(default_return={"error": AGENT_STREAM_CAPTURE})
     def run(
         self, user_input: str, session_id: str | None = None
     ) -> Generator[str, None, None]:

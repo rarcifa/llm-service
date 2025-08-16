@@ -13,53 +13,21 @@ import uuid
 from pathlib import Path
 from typing import Iterable, List, Optional
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 from app.common.decorators.retry import with_retry
+from app.common.utils.encoding import sha256
 from app.common.utils.logger import setup_logger
 from app.config import config
 from app.db.repositories.pgvector_repository import get_pgvector_repo
 from app.domain.ingestion.base.ingester_base import IngesterBase
-from app.domain.ingestion.utils.text import chunk_text
+from app.domain.ingestion.utils.ingestion_utils import chunk_text, safe_metadata
 from app.domain.retrieval.utils.embeddings_utils import get_embedding_model
 
 logger = setup_logger()
 
 
-def _sha256(text: str) -> str:
-    """Summary of `_sha256`.
 
-    Args:
-        text (str): Description of text.
-
-    Returns:
-        str: Description of return value.
-
-    """
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
-def _safe_metadata(meta: dict, *, max_len: int = 8192) -> dict:
-    """Summary of `_safe_metadata`.
-
-    Args:
-        meta (dict): Description of meta.
-        max_len (int): Description of max_len, default=8192.
-
-    Returns:
-        dict: Description of return value.
-
-    """
-    out = {}
-    for k, v in (meta or {}).items():
-        if isinstance(v, (str, int, float, bool)) or v is None:
-            out[k] = v
-        else:
-            s = str(v)
-            out[k] = s if len(s) <= max_len else s[:max_len]
-    return out
-
-
-class PgVectorIngester(IngesterBase):
+class IngesterImpl(IngesterBase):
     """Summary of `PgVectorIngester`.
 
     Attributes:
@@ -84,7 +52,7 @@ class PgVectorIngester(IngesterBase):
         self.patterns = list(config.retrieval.include_ext)
         self.docs_root.mkdir(parents=True, exist_ok=True)
 
-    @catch_and_log_errors()
+    @error_boundary()
     def _embed_chunks(self, chunks: List[str]) -> List[List[float]]:
         """Summary of `_embed_chunks`.
 
@@ -99,7 +67,7 @@ class PgVectorIngester(IngesterBase):
         return self.model.encode(chunks).tolist()
 
     @with_retry(max_retries=3)
-    @catch_and_log_errors()
+    @error_boundary()
     def _ingest_file(self, file_path: Path) -> None:
         """Summary of `_ingest_file`.
 
@@ -116,7 +84,7 @@ class PgVectorIngester(IngesterBase):
         with get_pgvector_repo(distance="cosine") as repo:
             for i, chunk in enumerate(chunks):
                 emb = vectors[i]
-                metadata = _safe_metadata(
+                metadata = safe_metadata(
                     {"source": file_path.name, "path": str(file_path), "chunk": i}
                 )
                 repo.upsert(
@@ -124,7 +92,7 @@ class PgVectorIngester(IngesterBase):
                     embedding=emb,
                     document=chunk,
                     metadata=metadata,
-                    content_sha256=_sha256(chunk),
+                    content_sha256=sha256(chunk),
                     id_override=str(uuid.uuid4()),
                 )
 

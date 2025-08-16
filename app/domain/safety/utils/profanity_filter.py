@@ -11,7 +11,7 @@ from __future__ import annotations
 import re
 from functools import lru_cache
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 
 
 def _censor(word: str) -> str:
@@ -47,7 +47,7 @@ def _profanity_regex():
     return re.compile("\\b(" + "|".join(escaped) + ")\\b", flags=re.IGNORECASE)
 
 
-@catch_and_log_errors(default_return="[PROFANITY FILTER FAILED]")
+@error_boundary(default_return="[PROFANITY FILTER FAILED]")
 def filter_profanity(text: str) -> str:
     """Summary of `filter_profanity`.
 

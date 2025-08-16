@@ -8,26 +8,33 @@ Generated on 2025-08-15.
 
 from __future__ import annotations
 
-from typing import Any, Callable, Generator, List
+import hashlib
+from typing import Any, Callable, Generator, List, Optional
+import uuid
 
 from jinja2 import Template
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
+from app.common.utils.encoding import sha256
 from app.config import config
 from app.constants.errors import (
+    AGENT_PERSIST,
     AGENT_RENDER_PROMPT,
     AGENT_SANITIZE_INPUT,
     AGENT_STREAM_CAPTURE,
 )
+from app.db.repositories.pgvector_repository import get_pgvector_repo
+from app.db.repositories.session_repository import get_session_repo
 from app.domain.provider.utils.provider_utils import verify_prompt_variables
+from app.domain.retrieval.utils.embeddings_utils import get_cached_embedding
 from app.domain.safety.utils.injection_detector import detect_prompt_injection
 from app.domain.safety.utils.pii_filter import redact_pii
 from app.domain.safety.utils.profanity_filter import filter_profanity
-from app.enums.prompts import PromptConfigKey
+from app.enums.prompts import PromptConfigKey, RoleKey
 from app.enums.tools import ToolKey, ToolName
 
 
-@catch_and_log_errors(default_return={"error": AGENT_SANITIZE_INPUT})
+@error_boundary(default_return={"error": AGENT_SANITIZE_INPUT})
 def sanitize_io(user_input: str) -> str:
     """Summary of `sanitize_io`.
 
@@ -48,7 +55,7 @@ def sanitize_io(user_input: str) -> str:
     return filtered or user_input.strip()
 
 
-@catch_and_log_errors(default_return={"error": AGENT_RENDER_PROMPT})
+@error_boundary(default_return={"error": AGENT_RENDER_PROMPT})
 def render_prompt(filtered_input: str, context_chunks: List[str]) -> str:
     """Summary of `render_prompt`.
 
@@ -83,7 +90,7 @@ def render_prompt(filtered_input: str, context_chunks: List[str]) -> str:
     return prompt
 
 
-@catch_and_log_errors(default_return={"error": AGENT_STREAM_CAPTURE})
+@error_boundary(default_return={"error": AGENT_STREAM_CAPTURE})
 def stream_with_capture(
     stream: Generator[str, None, None], on_complete: Callable[[str], Any] | None = None
 ) -> Generator[str, None, None]:
@@ -98,13 +105,57 @@ def stream_with_capture(
 
     """
     buffer: List[str] = []
+    for chunk in stream:
+        buffer.append(chunk)
+        yield chunk
+    full_output = "".join(buffer)
+    if on_complete:
+        on_complete(full_output)
 
-    def generator() -> Generator[str, None, None]:
-        for chunk in stream:
-            buffer.append(chunk)
-            yield chunk
-        full_output = "".join(buffer)
-        if on_complete:
-            on_complete(full_output)
+@error_boundary(default_return={"error": AGENT_PERSIST})
+def persist_conversation(
+    *,
+    session_id: str,
+    user_input: str,
+    response: str,
+    tokens_used: Optional[int] = None,
+    metadata: Optional[dict] = None,
+) -> None:
+    """Summary of `persist_conversation`.
 
-    return generator()
+    Args:
+        session_id (str): Description of session_id.
+        user_input (str): Description of user_input.
+        response (str): Description of response.
+        tokens_used (Optional[int]): Description of tokens_used, default=None.
+        metadata (Optional[dict]): Description of metadata, default=None.
+
+    """
+    with get_session_repo() as repo:
+        repo.get_or_create_session(session_id)
+        repo.store_message(
+            session_id=session_id,
+            role=RoleKey.USER,
+            content=user_input,
+            message_id=str(uuid.uuid4()),
+            tokens_used=tokens_used,
+            metadata=metadata,
+        )
+        repo.store_message(
+            session_id=session_id,
+            role=RoleKey.AGENT,
+            content=response.strip(),
+            message_id=str(uuid.uuid4()),
+            tokens_used=tokens_used,
+            metadata=metadata,
+        )
+    emb = get_cached_embedding(response)
+    with get_pgvector_repo(distance="cosine") as vrepo:
+        vrepo.upsert(
+            session_id=session_id,
+            collection=config.memory.collection_name,
+            embedding=emb,
+            document=response,
+            metadata={"session_id": session_id, **(metadata or {})},
+            content_sha256=sha256(response),
+        )

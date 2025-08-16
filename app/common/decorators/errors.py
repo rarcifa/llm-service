@@ -14,8 +14,8 @@ from app.common.utils.logger import setup_logger
 logger = setup_logger()
 
 
-def catch_and_log_errors(default_return=None):
-    """Summary of `catch_and_log_errors`.
+def error_boundary(default_return=None):
+    """Summary of `error_boundary`.
 
     Args:
         default_return: Description of default_return, default=None.

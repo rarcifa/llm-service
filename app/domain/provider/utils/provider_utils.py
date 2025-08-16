@@ -12,10 +12,10 @@ from typing import List
 
 from jinja2 import Environment, meta
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 
 
-@catch_and_log_errors(default_return=["__template_error__"])
+@error_boundary(default_return=["__template_error__"])
 def verify_prompt_variables(template_str: str, provided_vars: dict) -> List[str]:
     """Summary of `verify_prompt_variables`.
 

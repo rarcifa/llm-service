@@ -13,7 +13,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.common.error_handling import AppError
+from app.common.decorators.errors import AppError
 
 logger = logging.getLogger(__name__)
 

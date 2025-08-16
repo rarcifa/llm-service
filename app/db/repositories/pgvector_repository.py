@@ -17,7 +17,7 @@ from sqlalchemy import text
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
-from app.common.decorators.errors import catch_and_log_errors
+from app.common.decorators.errors import error_boundary
 from app.constants.errors import VECTOR_REPO_TOPK, VECTOR_REPO_UPSERT
 from app.db.models.vector_record import VectorRecordModel
 from app.db.postgres import SessionLocal
@@ -43,7 +43,7 @@ class PgVectorRepository:
         self.db = db
         self._distance = distance
 
-    @catch_and_log_errors(default_return={"error": VECTOR_REPO_UPSERT})
+    @error_boundary(default_return={"error": VECTOR_REPO_UPSERT})
     def upsert(
         self,
         *,
@@ -96,7 +96,7 @@ class PgVectorRepository:
         self.db.commit()
         return rec_id
 
-    @catch_and_log_errors(default_return={"error": VECTOR_REPO_TOPK})
+    @error_boundary(default_return={"error": VECTOR_REPO_TOPK})
     def topk(
         self, *, query_vec: list[float], collection: str, k: int = 5
     ) -> List[Dict[str, Any]]:
