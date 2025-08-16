@@ -6,7 +6,11 @@ Docstrings follow the Google Python style guide for consistency and clarity.
 Generated on 2025-08-15.
 """
 
+from app.common.decorators.errors import error_boundary
+from app.constants.errors import CHUNK_TEXT, SAFE_METADATA
 
+
+@error_boundary(default_return={"error": CHUNK_TEXT})
 def chunk_text(text: str, size: int) -> list[str]:
     """Summary of `chunk_text`.
 
@@ -20,6 +24,8 @@ def chunk_text(text: str, size: int) -> list[str]:
     """
     return [text[i : i + size] for i in range(0, len(text), size)]
 
+
+@error_boundary(default_return={"error": SAFE_METADATA})
 def safe_metadata(meta: dict, *, max_len: int = 8192) -> dict:
     """Summary of `safe_metadata`.
 

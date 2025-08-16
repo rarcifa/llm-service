@@ -8,9 +8,8 @@ Generated on 2025-08-15.
 
 from __future__ import annotations
 
-import hashlib
-from typing import Any, Callable, Generator, List, Optional
 import uuid
+from typing import Any, Callable, Generator, List, Optional
 
 from jinja2 import Template
 
@@ -32,6 +31,7 @@ from app.domain.safety.utils.pii_filter import redact_pii
 from app.domain.safety.utils.profanity_filter import filter_profanity
 from app.enums.prompts import PromptConfigKey, RoleKey
 from app.enums.tools import ToolKey, ToolName
+from app.enums.vector import DistanceMetric
 
 
 @error_boundary(default_return={"error": AGENT_SANITIZE_INPUT})
@@ -112,6 +112,7 @@ def stream_with_capture(
     if on_complete:
         on_complete(full_output)
 
+
 @error_boundary(default_return={"error": AGENT_PERSIST})
 def persist_conversation(
     *,
@@ -150,7 +151,7 @@ def persist_conversation(
             metadata=metadata,
         )
     emb = get_cached_embedding(response)
-    with get_pgvector_repo(distance="cosine") as vrepo:
+    with get_pgvector_repo(distance=DistanceMetric.COSINE) as vrepo:
         vrepo.upsert(
             session_id=session_id,
             collection=config.memory.collection_name,

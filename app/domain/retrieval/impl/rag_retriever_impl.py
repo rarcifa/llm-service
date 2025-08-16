@@ -13,6 +13,7 @@ from typing import List
 from app.config import config
 from app.db.repositories.pgvector_repository import get_pgvector_repo
 from app.domain.retrieval.utils.embeddings_utils import get_cached_embedding
+from app.enums.vector import DistanceMetric
 
 
 class RagRetrieverImpl:
@@ -31,7 +32,7 @@ class RagRetrieverImpl:
 
         """
         qvec = get_cached_embedding(query)
-        with get_pgvector_repo(distance="cosine") as repo:
+        with get_pgvector_repo(distance=DistanceMetric.COSINE) as repo:
             hits = repo.topk(
                 query_vec=qvec, collection=config.memory.collection_name, k=top_k
             )

@@ -8,7 +8,6 @@ Generated on 2025-08-15.
 
 from __future__ import annotations
 
-import hashlib
 import uuid
 from pathlib import Path
 from typing import Iterable, List, Optional
@@ -22,9 +21,9 @@ from app.db.repositories.pgvector_repository import get_pgvector_repo
 from app.domain.ingestion.base.ingester_base import IngesterBase
 from app.domain.ingestion.utils.ingestion_utils import chunk_text, safe_metadata
 from app.domain.retrieval.utils.embeddings_utils import get_embedding_model
+from app.enums.vector import DistanceMetric
 
 logger = setup_logger()
-
 
 
 class IngesterImpl(IngesterBase):
@@ -81,7 +80,7 @@ class IngesterImpl(IngesterBase):
         if not chunks:
             return
         vectors = self._embed_chunks(chunks)
-        with get_pgvector_repo(distance="cosine") as repo:
+        with get_pgvector_repo(distance=DistanceMetric.COSINE) as repo:
             for i, chunk in enumerate(chunks):
                 emb = vectors[i]
                 metadata = safe_metadata(

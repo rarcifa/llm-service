@@ -9,7 +9,6 @@ Generated on 2025-08-15.
 import json
 import logging
 
-from app.common.decorators.errors import error_boundary
 from app.config import config
 from app.domain.provider.impl.provider_impl import ProviderImpl
 from app.domain.tools.base.tool_planner_base import ToolPlannerBase
@@ -72,7 +71,7 @@ class PlannerImpl(ToolPlannerBase):
         elif isinstance(raw, dict):
             plan = [raw]
         elif isinstance(raw, str):
-            parsed =self.provider.run_json(raw, temperature=0.0)
+            parsed = self.provider.run_json(raw, temperature=0.0)
             if isinstance(parsed, list):
                 plan = parsed
             elif isinstance(parsed, dict):

@@ -8,9 +8,12 @@ Generated on 2025-08-15.
 
 from __future__ import annotations
 
+from app.common.decorators.errors import error_boundary
+from app.constants.errors import FILTER_HALLUCINATIONS
 from app.domain.eval.utils.eval_utils import detect_hallucination
 
 
+@error_boundary(default_return={"error": FILTER_HALLUCINATIONS})
 def filter_hallucinations(
     response: str, retrieved_docs: list[str] | None = None
 ) -> str:

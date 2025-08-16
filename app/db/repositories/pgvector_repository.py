@@ -21,6 +21,7 @@ from app.common.decorators.errors import error_boundary
 from app.constants.errors import VECTOR_REPO_TOPK, VECTOR_REPO_UPSERT
 from app.db.models.vector_record import VectorRecordModel
 from app.db.postgres import SessionLocal
+from app.enums.vector import DistanceMetric
 
 
 class PgVectorRepository:
@@ -31,7 +32,9 @@ class PgVectorRepository:
         db: Description of `db`.
     """
 
-    def __init__(self, db: Session, *, distance: str = "cosine") -> None:
+    def __init__(
+        self, db: Session, *, distance: DistanceMetric = DistanceMetric.COSINE
+    ) -> None:
         """Summary of `__init__`.
 
         Args:
@@ -135,7 +138,7 @@ class PgVectorRepository:
 
 
 @contextmanager
-def get_pgvector_repo(distance: str = "cosine"):
+def get_pgvector_repo(distance: DistanceMetric = DistanceMetric.COSINE):
     """Summary of `get_pgvector_repo`.
 
     Args:

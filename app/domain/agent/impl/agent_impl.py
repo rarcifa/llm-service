@@ -18,9 +18,8 @@ from app.common.utils.logger import setup_logger
 from app.config import config
 from app.constants.errors import AGENT_STREAM_CAPTURE
 from app.db.repositories.session_repository import get_session_repo
-from app.domain.agent.utils.agent_utils import persist_conversation
 from app.domain.agent.impl.pipeline_impl import PipelineImpl
-from app.domain.agent.utils.agent_utils import stream_with_capture
+from app.domain.agent.utils.agent_utils import persist_conversation, stream_with_capture
 from app.domain.eval.impl.eval_impl import EvalImpl
 from app.domain.provider.impl.provider_impl import ProviderImpl
 from app.enums.eval import EvalResultKey, RetrievalDocKey

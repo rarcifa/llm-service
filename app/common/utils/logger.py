@@ -14,8 +14,10 @@ from typing import Any
 
 import structlog
 
-LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-ENV = os.getenv("ENV", "dev").lower()
+from app.enums.env import EnvName, LogLevel
+
+LOG_LEVEL = os.getenv("LOG_LEVEL", str(LogLevel.INFO)).upper()
+ENV = os.getenv("ENV", EnvName.DEV).lower()
 
 
 def setup_logger(env: str = "dev", log_level: str = "INFO") -> Any:
@@ -33,7 +35,7 @@ def setup_logger(env: str = "dev", log_level: str = "INFO") -> Any:
     os.environ.setdefault("CHROMA_TELEMETRY_ENABLED", "false")
     log_level = getattr(logging, log_level.upper(), logging.INFO)
     logging.basicConfig(format="%(message)s", stream=sys.stdout, level=log_level)
-    if env == "prod":
+    if env == EnvName.PROD:
         warnings.filterwarnings("ignore", category=FutureWarning)
         warnings.filterwarnings("ignore", category=UserWarning)
         logging.getLogger("presidio").setLevel(logging.ERROR)
@@ -49,7 +51,7 @@ def setup_logger(env: str = "dev", log_level: str = "INFO") -> Any:
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
     ]
-    if env == "dev":
+    if env == EnvName.DEV:
         processors += [
             structlog.processors.TimeStamper(fmt="iso"),
             structlog.dev.ConsoleRenderer(),

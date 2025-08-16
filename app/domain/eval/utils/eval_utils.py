@@ -20,6 +20,8 @@ from app.common.decorators.errors import error_boundary
 from app.config import config
 from app.constants.errors import (
     COMPUTE_RATING,
+    COMPUTE_SCORES,
+    EXTRACT_SCORE_FROM_JUDGMENT,
     HALLUCINATION_DETECTION,
     SCORE_GROUNDEDNESS,
     SCORE_HELPFULNESS,
@@ -143,6 +145,7 @@ def detect_hallucination(response: str, retrieved_docs: list[str]) -> str:
     return HallucinationKey.HIGH
 
 
+@error_boundary(default_return={"error": EXTRACT_SCORE_FROM_JUDGMENT})
 def extract_score_from_judgment(judgment: str) -> int:
     """Summary of `extract_score_from_judgment`.
 
@@ -157,6 +160,7 @@ def extract_score_from_judgment(judgment: str) -> int:
     return int(match.group(1)) if match else 0
 
 
+@error_boundary(default_return={"error": COMPUTE_SCORES})
 def compute_scores(
     *,
     filtered_input: str,

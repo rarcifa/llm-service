@@ -13,7 +13,9 @@ from typing import List
 
 from sentence_transformers import SentenceTransformer
 
+from app.common.decorators.errors import error_boundary
 from app.config import config
+from app.constants.errors import GET_CACHED_EMBEDDING
 
 _model: SentenceTransformer | None = None
 
@@ -35,6 +37,7 @@ def get_embedding_model() -> SentenceTransformer:
 
 
 @lru_cache(maxsize=2048)
+@error_boundary(default_return={"error": GET_CACHED_EMBEDDING})
 def get_cached_embedding(text: str) -> List[float]:
     """Summary of `get_cached_embedding`.
 

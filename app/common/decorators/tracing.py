@@ -15,6 +15,8 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
+from app.enums.env import EnvName
+
 
 def setup_tracing(service_name: str = "enterprise_agent") -> None:
     """Summary of `setup_tracing`.
@@ -26,7 +28,7 @@ def setup_tracing(service_name: str = "enterprise_agent") -> None:
     resource = Resource.create({"service.name": service_name})
     provider = TracerProvider(resource=resource)
     trace.set_tracer_provider(provider)
-    if os.getenv("ENV", "dev") != "prod":
+    if os.getenv("ENV", EnvName.DEV) != "prod":
         provider.add_span_processor(BatchSpanProcessor(ConsoleSpanExporter()))
     provider.add_span_processor(
         BatchSpanProcessor(

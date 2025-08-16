@@ -8,7 +8,6 @@ Generated on 2025-08-15.
 
 from __future__ import annotations
 
-import hashlib
 from datetime import datetime, timezone
 from typing import List
 
@@ -18,6 +17,8 @@ from app.config import config
 from app.db.repositories.pgvector_repository import get_pgvector_repo
 from app.domain.memory.base.memory_base import MemoryBase
 from app.domain.retrieval.utils.embeddings_utils import get_cached_embedding
+from app.enums.vector import DistanceMetric
+
 
 class MemoryImpl(MemoryBase):
     """Summary of `MemoryImpl`.
@@ -48,7 +49,7 @@ class MemoryImpl(MemoryBase):
         """
         text = f"User: {user_input}\nAgent: {agent_response}"
         emb = get_cached_embedding(text)
-        with get_pgvector_repo(distance="cosine") as repo:
+        with get_pgvector_repo(distance=DistanceMetric.COSINE) as repo:
             repo.upsert(
                 collection=config.memory.collection_name,
                 embedding=emb,
@@ -73,7 +74,7 @@ class MemoryImpl(MemoryBase):
 
         """
         qemb = get_cached_embedding(query)
-        with get_pgvector_repo(distance="cosine") as repo:
+        with get_pgvector_repo(distance=DistanceMetric.COSINE) as repo:
             hits = repo.topk(
                 query_vec=qemb,
                 collection=config.memory.collection_name,

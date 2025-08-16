@@ -10,6 +10,7 @@ import ast
 import operator as op
 
 from app.common.decorators.errors import error_boundary
+from app.constants.errors import CALCULATOR_EVAL
 
 _OPS = {
     ast.Add: op.add,
@@ -23,6 +24,7 @@ _OPS = {
 }
 
 
+@error_boundary(default_return={"error": CALCULATOR_EVAL})
 def eval(node):
     """Summary of `eval`.
 
